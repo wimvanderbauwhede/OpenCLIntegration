@@ -1,0 +1,29 @@
+cl.hpp version
+--------------
+
+By default, this wrapper uses the "old" C++ API:
+
+*   \brief C++ bindings for OpenCL 1.0 (rev 48) and OpenCL 1.1 (rev 33)    
+*   \author Benedict R. Gaster and Laurent Morichetti
+*   
+*   Additions and fixes from Brian Cole, March 3rd 2010.
+*   
+*   \version 1.1
+*   \date June 2010
+
+If you want to use the newer C++ API:
+
+*   \brief C++ bindings for OpenCL 1.0 (rev 48), OpenCL 1.1 (rev 33) and 
+*       OpenCL 1.2 (rev 15)    
+*   \author Benedict R. Gaster and Laurent Morichetti
+*   
+*   Additions and fixes from:
+*       Brian Cole, March 3rd 2010 
+*       Lee Howes, October 2011, March 2012.
+*   
+*   \version 1.2
+*   \date April 2012
+
+then you need to define the macro OCLV2
+You can do this with the V=2 option in the SCons script.
+
