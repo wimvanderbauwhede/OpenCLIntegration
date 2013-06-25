@@ -6,7 +6,12 @@
 #ifdef OSX
 #include "cl.hpp"
 #else
+#ifdef OCLV2
 #include <CL/cl.hpp>
+#else
+#include <cl.hpp>
+#endif
+
 #endif
 enum InfoType {UINT, ULONG, STRING};
 
@@ -55,7 +60,7 @@ class DeviceInfo {
         infotbl["CL_DEVICE_MEM_BASE_ADDR_ALIGN"]=InfoTuple(CL_DEVICE_MEM_BASE_ADDR_ALIGN,UINT);
         infotbl["CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE"]=InfoTuple(CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE,UINT);
         //infotbl["CL_DEVICE_SINGLE_FP_CONFIG"]=InfoTuple(CL_DEVICE_SINGLE_FP_CONFIG,UINT);
-        //infotbl["CL_DEVICE_GLOBAL_MEM_CACHE_TYPE"]=InfoTuple(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE,UINT);
+        infotbl["CL_DEVICE_GLOBAL_MEM_CACHE_TYPE"]=InfoTuple(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE,UINT);
         infotbl["CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE"]=InfoTuple(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,UINT);
         infotbl["CL_DEVICE_GLOBAL_MEM_CACHE_SIZE"]=InfoTuple(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,ULONG);
         infotbl["CL_DEVICE_GLOBAL_MEM_SIZE"]=InfoTuple(CL_DEVICE_GLOBAL_MEM_SIZE,ULONG);
@@ -65,7 +70,7 @@ class DeviceInfo {
         infotbl["CL_DEVICE_LOCAL_MEM_SIZE"]=InfoTuple(CL_DEVICE_LOCAL_MEM_SIZE,ULONG);
         //infotbl["CL_DEVICE_ERROR_CORRECTION_SUPPORT"]=InfoTuple(CL_DEVICE_ERROR_CORRECTION_SUPPORT,UINT);
         //infotbl["CL_DEVICE_PROFILING_TIMER_RESOLUTION"]=InfoTuple(CL_DEVICE_PROFILING_TIMER_RESOLUTION,UINT);
-        //infotbl["CL_DEVICE_ENDIAN_LITTLE"]=InfoTuple(CL_DEVICE_ENDIAN_LITTLE,UINT);
+        infotbl["CL_DEVICE_ENDIAN_LITTLE"]=InfoTuple(CL_DEVICE_ENDIAN_LITTLE,UINT);
         //infotbl["CL_DEVICE_AVAILABLE"]=InfoTuple(CL_DEVICE_AVAILABLE,UINT);
         //infotbl["CL_DEVICE_COMPILER_AVAILABLE"]=InfoTuple(CL_DEVICE_COMPILER_AVAILABLE,UINT);
         //infotbl["CL_DEVICE_EXECUTION_CAPABILITIES"]=InfoTuple(CL_DEVICE_EXECUTION_CAPABILITIES,UINT);
@@ -79,8 +84,14 @@ class DeviceInfo {
         //infotbl["CL_DEVICE_PLATFORM"]=InfoTuple(CL_DEVICE_PLATFORM,UINT);
     };
     unsigned int max_compute_units(const cl::Device&);
+    unsigned long int local_mem_size(const cl::Device&);
+    unsigned long global_mem_max_alloc_size(const cl::Device&);
+    unsigned long int global_mem_size(const cl::Device&);
+	unsigned int global_mem_cache_type(const cl::Device& device);
+	bool is_little_endian(const cl::Device& device);
     bool isGPU(const cl::Device&);
     bool isCPU(const cl::Device&);
+    bool isACC(const cl::Device&);
 };
 
 

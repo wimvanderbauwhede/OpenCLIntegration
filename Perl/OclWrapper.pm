@@ -8,7 +8,7 @@ use feature qw(switch say);
 
 use Inline (
 'C' => 'DATA', # Don't know why this must be 'DATA'
-        LIBS => '-L'.$ENV{'OPENCL_DIR'}.'/OpenCLIntegration/lib -lOclWrapperF -lstdc++ -lOpenCL',
+        LIBS => '-L. -L'.$ENV{'OPENCL_DIR'}.'/OpenCLIntegration/lib -lOclWrapperF -lstdc++ -lOpenCL',
         INC => '-I'.$ENV{'OPENCL_DIR'}.'/OpenCLIntegration',
 		FORCE_BUILD => 0,
         CLEAN_AFTER_BUILD => 0
@@ -237,30 +237,30 @@ __C__
 
 long oclInit(char* clsrcstr, char* kstr) {
 	uint64_t ocl_ivp;
-    	oclinit_(&ocl_ivp,clsrcstr,kstr);
+    	oclinitc_(&ocl_ivp,clsrcstr,kstr);
 	return ocl_ivp;
 }
 int oclGetMaxComputeUnits(long ocl) {
 	int nunits;
-	oclgetmaxcomputeunits_(&ocl,&nunits);
+	oclgetmaxcomputeunitsc_(&ocl,&nunits);
 	return nunits;
 }
 
 long oclMakeReadBuffer(long ocl, int sz) {
 	uint64_t buffer;
-	oclmakereadbuffer_(&ocl,&buffer, &sz);
+	oclmakereadbufferc_(&ocl,&buffer, &sz);
 	return buffer;
 }
 
 long oclMakeWriteBuffer(long ocl, int sz) {
 	uint64_t buffer;
-	oclmakewritebuffer_(&ocl,&buffer, &sz);
+	oclmakewritebufferc_(&ocl,&buffer, &sz);
 	return buffer;
 }
 
 void oclwritebuffer(long ocl, long buffer, int sz, char* array) {
 	//void* array=(float*)array;
-	oclwritebuffer_(&ocl,&buffer, &sz, array);
+	oclwritebufferc_(&ocl,&buffer, &sz, array);
 }
 
 SV* oclreadbuffer(long ocl, long buffer, int sz ) {
@@ -272,22 +272,22 @@ SV* oclreadbuffer(long ocl, long buffer, int sz ) {
 // Extract the pointer to the underlying buffer
 	void *data = SvPV_nolen(res);
 
-	oclreadbuffer_(&ocl,&buffer, &sz,data);
+	oclreadbufferc_(&ocl,&buffer, &sz,data);
 	sv_setpvn(res,data,sz);
 //	SV* res = newSVpvn((char*)data,sz);
 //	free( data);
 	return res;
 }
 void oclSetArrayArg(long ocl,int pos, long buf) {
-	oclsetarrayarg_(&ocl,&pos, &buf);
+	oclsetarrayargc_(&ocl,&pos, &buf);
 }
 void oclSetFloatArrayArg(long ocl,int pos, long buf) {
-	oclsetarrayarg_(&ocl,&pos, &buf);
+	oclsetarrayargc_(&ocl,&pos, &buf);
 }
 void oclSetIntConstArg(long ocl,int pos, int constarg) {
-	oclsetintconstarg_(&ocl,&pos, &constarg);
+	oclsetintconstargc_(&ocl,&pos, &constarg);
 }
 void oclRun (long ocl,int globalrange , int localrange) {
-	runocl_(&ocl,&globalrange , &localrange);
+	runoclc_(&ocl,&globalrange , &localrange);
 }
 

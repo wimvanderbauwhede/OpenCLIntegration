@@ -6,7 +6,13 @@
 #ifdef OSX
 #include "cl.hpp"
 #else
-#include "CL/cl.hpp"
+//#include "CL/cl.hpp"
+#ifdef OCLV2
+#include <vector>
+#include <CL/cl.hpp>
+#else
+#include <cl.hpp>
+#endif
 #endif
 
 class PlatformInfo {
@@ -17,7 +23,11 @@ class PlatformInfo {
         std::map<std::string,std::string> string_props;
 //        const cl::vector<cl::Platform>& platformList;
     public:
-        void show(const cl::vector<cl::Platform>& pl_, int platformIdx);
+#ifdef OCLV2
+        void show(const std::vector< cl::Platform >& pl_, int platformIdx);
+#else
+        void show(const cl::vector< cl::Platform >& pl_, int platformIdx);
+#endif
         void show(const cl::Platform& platform);
 
         PlatformInfo() ;
