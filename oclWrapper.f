@@ -74,7 +74,7 @@
             !integer, allocatable, dimension(:) :: ptr
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-        subroutine oclMakeInttArrayReadWriteBuffer(buffer, sz,ptr)
+        subroutine oclMakeIntArrayReadWriteBuffer(buffer, sz,ptr)
             integer(8):: buffer
             integer :: sz
             integer, allocatable, dimension(:) :: ptr
