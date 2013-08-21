@@ -15,16 +15,39 @@ sub gen_szstr {
 	return $szstr;
 }
 
+open my $IN, '<', 'oclWrapper_TEMPL.f95';
+open my $OUT, '>', 'oclWrapper.f95';
 
-print "\n! Make n-D Array Buffers\n\n";
+while (my $line = <$IN> ){
+    print $OUT $line;
+    if ($line=~/^\s*\!\s*\$GEN\s+WrapperSubs/i) {
 
-for my $type (@types) {
-	my $ftype = $ftypes{$type};
-	my $wordsz = $wordsizes{$type};
-	for my $mode (@modes) {
-		for my $dim (@dims) {
-			my $szstr=gen_szstr($dim);
-my $code_MakeArrayBuffer = "
+        print $OUT "\n! Make n-D Array Buffers\n\n";
+
+        for my $type (@types) {
+            my $ftype = $ftypes{$type};
+            my $wordsz = $wordsizes{$type};
+            for my $mode ('Write') {
+                for my $dim (@dims) {
+                    my $szstr=gen_szstr($dim);
+                    $szstr=~s/\s*,\s*/*/g;
+                    my $code_MakeArrayBuffer = "
+        subroutine oclMake${dim}D${type}Array${mode}Buffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension($dim):: sz
+            sz1d = $szstr*$wordsz 
+            call oclMake${mode}BufferC(ocl,buffer, sz1d)
+        end subroutine
+        ";
+                    print $OUT $code_MakeArrayBuffer;
+                }
+            }
+
+            for my $mode (qw(Read ReadWrite)) {
+                for my $dim (@dims) {
+                    my $szstr=gen_szstr($dim);
+                    my $code_MakeArrayBuffer = "
         subroutine oclMake${dim}D${type}Array${mode}Buffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
@@ -33,22 +56,23 @@ my $code_MakeArrayBuffer = "
             sz1d = size(array)*$wordsz 
             call oclMake${mode}BufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-";
-print $code_MakeArrayBuffer;
-		}
-	}
-}
+        ";
+                    print $OUT $code_MakeArrayBuffer;
+                }
+            }
 
-print "\n! Write n-D Array Buffers\n\n";
+        }
 
-for my $type (@types) {
-	my $ftype = $ftypes{$type};
-		my $wordsz = $wordsizes{$type};
+        print $OUT "\n! Write n-D Array Buffers\n\n";
 
-		for my $dim (@dims) {
-			my $szstr=gen_szstr($dim);
+        for my $type (@types) {
+            my $ftype = $ftypes{$type};
+            my $wordsz = $wordsizes{$type};
 
-my $code_WriteBuffer = "
+            for my $dim (@dims) {
+                my $szstr=gen_szstr($dim);
+
+                my $code_WriteBuffer = "
         subroutine oclWrite${dim}D${type}ArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -57,22 +81,20 @@ my $code_WriteBuffer = "
             sz1d=size(array)*$wordsz
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
+        ";
+                print $OUT $code_WriteBuffer;
+            }}
 
-";
-print $code_WriteBuffer;
-		}}
+        print $OUT "\n! Read n-D Array Buffers\n\n";
 
-print "\n! Read n-D Array Buffers\n\n";
+        for my $type (@types) {
+            my $ftype = $ftypes{$type};
+            my $wordsz = $wordsizes{$type};
 
+            for my $dim (@dims) {
+                my $szstr=gen_szstr($dim);
 
-for my $type (@types) {
-	my $ftype = $ftypes{$type};
-		my $wordsz = $wordsizes{$type};
-
-		for my $dim (@dims) {
-			my $szstr=gen_szstr($dim);
-
-my $code_ReadBuffer = "
+                my $code_ReadBuffer = "
         subroutine oclRead${dim}D${type}ArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -83,7 +105,11 @@ my $code_ReadBuffer = "
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-";
-print $code_ReadBuffer;
-		}}
-
+        ";
+                print $OUT $code_ReadBuffer;
+            }
+        }
+    }
+} # loop over template source
+close $IN;
+close $OUT;

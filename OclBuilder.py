@@ -233,9 +233,12 @@ def initOcl(*envt):
 
     if useF=='1':
         env['FORTRAN']=os.environ['FORTRAN_COMPILER']
+        env['F95']=os.environ['FORTRAN_COMPILER']
         if os.environ['FORTRAN_COMPILER'] == os.environ['GFORTRAN'] :
             env['FORTRANFLAGS']=env['CFLAGS']
-            env.Append(FORTRANFLAGS=['-cpp','-m64'])
+            env.Append(FORTRANFLAGS=['-cpp','-m64','-ffree-form'])
+            env['F95FLAGS']=env['CFLAGS']
+            env.Append(F95FLAGS=['-cpp','-m64','-ffree-form'])
         else:
             env['CFLAGS'].pop(0)
             env['CFLAGS'].pop(0)
@@ -247,7 +250,7 @@ def initOcl(*envt):
                 flib = env.SharedLibrary('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
             else:    
                 flib = env.Library('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
-            fflib = env.Object('oclWrapper.o',OPENCL_DIR+'/OpenCLIntegration/oclWrapper.f')
+            fflib = env.Object('oclWrapper.o',OPENCL_DIR+'/OpenCLIntegration/oclWrapper.f95')
 #    else:            
     if useOclWrapper:
         if useDyn=='1':
