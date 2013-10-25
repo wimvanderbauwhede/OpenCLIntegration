@@ -9,13 +9,18 @@
 #ifndef OCLV2
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 #else
+// OpenCL v1.2
 #include <vector>
 #endif
+
 #ifdef OSX
+// On OS X headers are in non-standard location
 #include <cl.hpp>
 #else
+// Not OS X, i.e. Linux
 #ifdef OCLV2
 #include <CL/cl.hpp>
+// OpenCL v1.2
 #include <OclKernelFunctor.h>
 #else
 #include <cl.hpp>
