@@ -482,9 +482,9 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* opts) {
-    //std::cout << "buildProgram\n";
+    std::cout << "buildProgram <" << ksource << ">\n";
 	buildProgram(ksource,opts);
-    //std::cout << "new Kernel\n";
+    std::cout << "new Kernel <"<< kname <<">\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
     checkErr(err, "loadKernel::Kernel()");

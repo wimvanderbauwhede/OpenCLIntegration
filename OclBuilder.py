@@ -58,7 +58,7 @@ def initOcl(*envt):
      nruns= [1]                                      NRUNS
      D=[comma-sep list of macros]
      F=0|1 [0] use the functional (non-OO) interface OclBuilder.useF
-     V=1|2 [1] OpenCL C++ API version
+     V=1.1|1.2 [1.2] OpenCL C++ API version
     *oclwrapper=0|1 [1] use the OclWrapper API       OclBuilder.useOclWrapper
 
     The options marked with * can be set as OclBuilder.OPTION=VALUE in the SCons script
@@ -148,9 +148,9 @@ def initOcl(*envt):
     if verbose=='0':
         vflag=''
 
-    version=getOpt('V','Version','2')
+    version=getOpt('V','Version','1.2')
     verflag=''
-    if version=='2':
+    if version=='1.2':
         verflag='-DOCLV2'
 
     dbg=getOpt('dbg','Debug','0')    
