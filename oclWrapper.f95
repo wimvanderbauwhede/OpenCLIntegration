@@ -8,12 +8,16 @@
         save
         contains
 
-        subroutine oclInit(source,srclen,kernel,klen)
+!        subroutine oclInit(srcstr,srclen,kstr,klen)
+        subroutine oclInit(srcstr,kstr)   
             integer :: srclen, klen
-            character(srclen) :: source 
-            character(klen) :: kernel 
-!            print *, "source=<",source,">;  kernel=<",kernel,">"
-            call oclinitf(ocl, source, srclen, kernel, klen)
+            character(len=:), allocatable :: srcstr, kstr
+!            character(srclen) :: srcstr 
+!            character(klen) :: kstr 
+            allocate(character(len=srclen) :: srcstr)
+            allocate(character(len=klen) :: kstr)
+!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
+            call oclinitf(ocl, srcstr, srclen, kstr, klen)
         end subroutine
 
         subroutine oclGetMaxComputeUnits(nunits)
