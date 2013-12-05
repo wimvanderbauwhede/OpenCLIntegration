@@ -201,9 +201,12 @@ def initOcl(*envt):
         env['OCLSOURCES']=oclsources
 
     if OSX==1 and 'ROOTSYS' in os.environ:
+        print 'Setting CXX to g++-4.2 for CERN ROOT on OS X'
         env['CXX'] = ['g++-4.2'] # FIXME: because any higher g++ results in ERROR: malloc: *** error for object 0x7fff7064c500: pointer being freed was not allocated
     elif 'CXX_COMPILER' in os.environ:
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
+    elif 'CXX' in os.environ:
+        env['CXX'] = [ os.environ['CXX'] ]
     env.Append(CXXFLAGS = ['-std=c++0x','-Wall',dbgflag,dbgmacro,optflag,DEVFLAGS,KERNEL_OPTS]) 
     env.Append(CFLAGS = ['-Wall',dbgflag,optflag,DEVFLAGS,KERNEL_OPTS])     
     env.Help(help)
@@ -232,9 +235,13 @@ def initOcl(*envt):
             env.Append(CPPPATH=[NVIDIA_SDK_PATH+'/OpenCL/common/inc' ,NVIDIA_SDK_PATH+'/OpenCL/common/inc/CL'])
 
     if useF=='1':
-        env['FORTRAN']=os.environ['FORTRAN_COMPILER']
-        env['F95']=os.environ['FORTRAN_COMPILER']
-        if os.environ['FORTRAN_COMPILER'] == os.environ['GFORTRAN'] :
+        if 'FORTRAN_COMPILER' in os.environ:
+            env['FORTRAN']=os.environ['FORTRAN_COMPILER']
+            env['F95']=os.environ['FORTRAN_COMPILER']
+        if 'FC' in os.environ:
+            env['FORTRAN']=os.environ['FC']
+            env['F95']=os.environ['FC']
+        if (os.environ['GFORTRAN'] in os.environ and env['FORTRAN'] == os.environ['GFORTRAN']) :
             env['FORTRANFLAGS']=env['CFLAGS']
             env.Append(FORTRANFLAGS=['-cpp','-m64','-ffree-form'])
             env['F95FLAGS']=env['CFLAGS']

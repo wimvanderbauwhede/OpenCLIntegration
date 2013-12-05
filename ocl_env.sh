@@ -19,4 +19,5 @@ export PATH=$OPENCL_DIR/OpenCLIntegration/bin:$PATH
 
 # Must be either GNU or PGI compiler, no others supported yet
 export FORTRAN_COMPILER=$GFORTRAN 
+export FC=$GFORTRAN 
 
