@@ -1,7 +1,7 @@
 An OpenCL wrapper class and a SCons build library to simplify integration 
 of OpenCL code in C++, C, Fortran and Perl
 
-(c) Wim Vanderbauwhede 2010-2012
+(c) Wim Vanderbauwhede 2010-2013
 
 OclWrapper: and OpenCL wrapper class in C++
 OclBuilder.py: a SCons builder for OpenCL applications using OclWrapper
@@ -13,15 +13,25 @@ To use the OclWrapper and OclBuilder, all you need to do is:
 
 - In your SConstruct file:
 
-from OclBuilder import initOcl
+    from OclBuilder import initOcl
 
-# Define your Environment as required for your build
+    # Define your Environment as required for your build
 
-# Initialise OpenCL-specific env values
-env = initOcl(env)
+    # Initialise OpenCL-specific env values
+    env = initOcl(env)
 
-# Rest of your build as usual
+    # Rest of your build as usual
 
+For a simple build, you can also do
+
+    from OclBuilder import build
+
+    appname='matmult_int'
+
+    # Any additional sources
+    sources=[appname+'.cc']
+
+    build(appname,sources)
 
 If you use Make or another build system, then just build the OclWrapper library with SCons and
 use it in your build script. For example, to integrate OpenCL into Fortran, your SConscript looks 
@@ -53,9 +63,9 @@ OCL_LDFLAGS =  -L../opencl_wrapper -L$(OCLINTDIR) \
   
   ocl.writeBuffer(...);
   ocl.enqueueNDRange(cl::NDRange(...), cl::NDRange(...));
-  ocl.kernel_functor( ... ).wait();
+  ocl.runKernel( ... ).wait();
   ocl.readBuffer(...);
-  // And many more, see OclWrapper.h code
+  // There are many more options, see OclWrapper.h code
 
 - In your Fortran code:
 
@@ -67,6 +77,6 @@ OCL_LDFLAGS =  -L../opencl_wrapper -L$(OCLINTDIR) \
   oclWriteBuffer(...);
   runOcl(globalrange, localrange)
   oclReadBuffer(...)
-  ! And many more, see oclWrapper.f code
+  ! There are  many more options, see oclWrapper.f code
 
 

@@ -7,8 +7,11 @@ PlatformInfo::PlatformInfo() {
     	    infotbl["CL_PLATFORM_VENDOR"]=CL_PLATFORM_VENDOR ;
     	    infotbl["CL_PLATFORM_EXTENSIONS"]=CL_PLATFORM_EXTENSIONS ;
         };
-
+#ifdef OCLV2
+void PlatformInfo::show(const std::vector<cl::Platform>& platformList, int platformIdx) {
+#else
 void PlatformInfo::show(const cl::vector<cl::Platform>& platformList, int platformIdx) {
+#endif
 	cl_int err;
     std::cout << "\nPlatform Info:"<< std::endl;
 

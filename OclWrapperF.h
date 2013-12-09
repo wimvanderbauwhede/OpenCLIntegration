@@ -42,7 +42,7 @@ extern "C" {
 #include "OclWrapperC.h"
 /*
 // The minimal API is as follows:
-void oclinit_(OclWrapperF ocl,const char* source,const char* kernel);
+void oclinitc_(OclWrapperF ocl,const char* source,const char* kernel);
 void oclgetmaxcomputeunits_(OclWrapperF ocl,int* nunits);
 
 void oclmakereadbuffer_(OclWrapperF ocl,OclBufferF buffer, int* size);

@@ -8,11 +8,16 @@
         save
         contains
 
-        subroutine oclInit(source,kernel)
-            character(*) :: source 
-            character(*) :: kernel 
-!            print *, source, kernel
-            call oclinitc(ocl, source, kernel)
+!        subroutine oclInit(srcstr,srclen,kstr,klen)
+        subroutine oclInit(srcstr,kstr)   
+            integer :: srclen, klen
+            character(len=:), allocatable :: srcstr, kstr
+!            character(srclen) :: srcstr 
+!            character(klen) :: kstr 
+            allocate(character(len=srclen) :: srcstr)
+            allocate(character(len=klen) :: kstr)
+!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
+            call oclinitf(ocl, srcstr, srclen, kstr, klen)
         end subroutine
 
         subroutine oclGetMaxComputeUnits(nunits)
@@ -204,765 +209,795 @@
             array = reshape(array1d,shape(array))
         end subroutine
 
+!$GEN WrapperSubs
+
 ! Make n-D Array Buffers
 
 
+        subroutine oclMake1DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(1):: sz
+            sz1d = sz(1)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake2DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(2):: sz
+            sz1d = sz(1)*sz(2)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake3DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(3):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake4DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(4):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake5DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(5):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake6DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(6):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake7DFloatArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(7):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*sz(7)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
         subroutine oclMake1DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             real,dimension(sz(1)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake1DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             real,dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake2DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             real,dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake3DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake4DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake5DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake6DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake7DFloatArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
-        subroutine oclMake1DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(1):: sz
-            real,dimension(sz(1)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake2DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(2):: sz
-            real,dimension(sz(1), sz(2)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake3DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(3):: sz
-            real,dimension(sz(1), sz(2), sz(3)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake4DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(4):: sz
-            real,dimension(sz(1), sz(2), sz(3), sz(4)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake5DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(5):: sz
-            real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake6DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(6):: sz
-            real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake7DFloatArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(7):: sz
-            real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
+        
         subroutine oclMake1DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             real,dimension(sz(1)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake1DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             real,dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake2DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             real,dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake3DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake4DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake5DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake6DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DFloatArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             real,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake7DFloatArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
+        subroutine oclMake1DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(1):: sz
+            sz1d = sz(1)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake2DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(2):: sz
+            sz1d = sz(1)*sz(2)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake3DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(3):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake4DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(4):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake5DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(5):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake6DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(6):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake7DDoubleArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(7):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*sz(7)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
         subroutine oclMake1DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             real(8),dimension(sz(1)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake1DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             real(8),dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake2DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             real(8),dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake3DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake4DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake5DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake6DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DDoubleArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake7DDoubleArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
-        subroutine oclMake1DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(1):: sz
-            real(8),dimension(sz(1)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake2DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(2):: sz
-            real(8),dimension(sz(1), sz(2)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake3DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(3):: sz
-            real(8),dimension(sz(1), sz(2), sz(3)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake4DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(4):: sz
-            real(8),dimension(sz(1), sz(2), sz(3), sz(4)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake5DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(5):: sz
-            real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake6DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(6):: sz
-            real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake7DDoubleArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(7):: sz
-            real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
+        
         subroutine oclMake1DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             real(8),dimension(sz(1)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake1DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             real(8),dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake2DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             real(8),dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake3DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake4DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake5DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake6DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DDoubleArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             real(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake7DDoubleArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
+        subroutine oclMake1DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(1):: sz
+            sz1d = sz(1)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake2DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(2):: sz
+            sz1d = sz(1)*sz(2)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake3DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(3):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake4DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(4):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake5DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(5):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake6DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(6):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake7DIntArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(7):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*sz(7)*4 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
         subroutine oclMake1DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             integer,dimension(sz(1)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake1DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             integer,dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake2DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             integer,dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake3DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake4DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake5DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake6DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake7DIntArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
-        subroutine oclMake1DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(1):: sz
-            integer,dimension(sz(1)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake2DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(2):: sz
-            integer,dimension(sz(1), sz(2)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake3DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(3):: sz
-            integer,dimension(sz(1), sz(2), sz(3)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake4DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(4):: sz
-            integer,dimension(sz(1), sz(2), sz(3), sz(4)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake5DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(5):: sz
-            integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake6DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(6):: sz
-            integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake7DIntArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(7):: sz
-            integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
-            sz1d = size(array)*4 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
+        
         subroutine oclMake1DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             integer,dimension(sz(1)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake1DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             integer,dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake2DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             integer,dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake3DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake4DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake5DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake6DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DIntArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             integer,dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*4 
+			print *, 'oclMake7DIntArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
+        subroutine oclMake1DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(1):: sz
+            sz1d = sz(1)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake2DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(2):: sz
+            sz1d = sz(1)*sz(2)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake3DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(3):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake4DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(4):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake5DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(5):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake6DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(6):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
+        subroutine oclMake7DLongArrayWriteBuffer(buffer, sz)
+            integer(8):: buffer
+            integer :: sz1d
+            integer, dimension(7):: sz
+            sz1d = sz(1)*sz(2)*sz(3)*sz(4)*sz(5)*sz(6)*sz(7)*8 
+            call oclMakeWriteBufferC(ocl,buffer, sz1d)
+        end subroutine
+        
         subroutine oclMake1DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             integer(8),dimension(sz(1)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake1DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             integer(8),dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake2DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             integer(8),dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake3DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake4DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake5DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake6DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DLongArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake7DLongArrayReadBuffer(',sz1d,')'
             call oclMakeReadBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
-        subroutine oclMake1DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(1):: sz
-            integer(8),dimension(sz(1)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake2DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(2):: sz
-            integer(8),dimension(sz(1), sz(2)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake3DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(3):: sz
-            integer(8),dimension(sz(1), sz(2), sz(3)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake4DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(4):: sz
-            integer(8),dimension(sz(1), sz(2), sz(3), sz(4)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake5DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(5):: sz
-            integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake6DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(6):: sz
-            integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
-        subroutine oclMake7DLongArrayWriteBuffer(buffer, sz, array)
-            integer(8):: buffer
-            integer :: sz1d
-            integer, dimension(7):: sz
-            integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
-            sz1d = size(array)*8 
-            call oclMakeWriteBufferPtrC(ocl,buffer, sz1d, array)
-        end subroutine
-
+        
         subroutine oclMake1DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(1):: sz
             integer(8),dimension(sz(1)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake1DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake2DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(2):: sz
             integer(8),dimension(sz(1), sz(2)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake2DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake3DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(3):: sz
             integer(8),dimension(sz(1), sz(2), sz(3)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake3DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake4DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(4):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake4DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake5DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(5):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake5DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake6DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(6):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake6DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
         subroutine oclMake7DLongArrayReadWriteBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
             integer, dimension(7):: sz
             integer(8),dimension(sz(1), sz(2), sz(3), sz(4), sz(5), sz(6), sz(7)) :: array
             sz1d = size(array)*8 
+			print *, 'oclMake7DLongArrayReadWriteBuffer(',sz1d,')'
             call oclMakeReadWriteBufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
-
+        
 ! Write n-D Array Buffers
 
 
@@ -974,8 +1009,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite2DFloatArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -984,8 +1018,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite3DFloatArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -994,8 +1027,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite4DFloatArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1004,8 +1036,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite5DFloatArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1014,8 +1045,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite6DFloatArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1024,8 +1054,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite7DFloatArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1034,8 +1063,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite1DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1044,8 +1072,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite2DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1054,8 +1081,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite3DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1064,8 +1090,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite4DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1074,8 +1099,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite5DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1084,8 +1108,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite6DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1094,8 +1117,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite7DDoubleArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1104,8 +1126,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite1DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1114,8 +1135,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite2DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1124,8 +1144,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite3DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1134,8 +1153,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite4DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1144,8 +1162,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite5DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1154,8 +1171,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite6DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1164,8 +1180,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite7DIntArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1174,8 +1189,7 @@
             sz1d=size(array)*4
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite1DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1184,8 +1198,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite2DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1194,8 +1207,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite3DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1204,8 +1216,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite4DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1214,8 +1225,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite5DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1224,8 +1234,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite6DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1234,8 +1243,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
         subroutine oclWrite7DLongArrayBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1244,8 +1252,7 @@
             sz1d=size(array)*8
             call oclwritebufferc(ocl,buffer, sz1d,array)
         end subroutine
-
-
+        
 ! Read n-D Array Buffers
 
 
@@ -1259,7 +1266,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead2DFloatArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1270,7 +1277,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead3DFloatArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1281,7 +1288,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead4DFloatArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1292,7 +1299,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead5DFloatArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1303,7 +1310,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead6DFloatArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1314,7 +1321,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead7DFloatArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1325,7 +1332,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead1DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1336,7 +1343,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead2DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1347,7 +1354,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead3DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1358,7 +1365,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead4DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1369,7 +1376,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead5DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1380,7 +1387,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead6DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1391,7 +1398,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead7DDoubleArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1402,7 +1409,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead1DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1413,7 +1420,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead2DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1424,7 +1431,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead3DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1435,7 +1442,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead4DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1446,7 +1453,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead5DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1457,7 +1464,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead6DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1468,7 +1475,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead7DIntArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1479,7 +1486,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead1DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1490,7 +1497,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead2DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1501,7 +1508,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead3DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1512,7 +1519,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead4DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1523,7 +1530,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead5DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1534,7 +1541,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead6DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1545,7 +1552,7 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
         subroutine oclRead7DLongArrayBuffer(buffer,sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -1556,5 +1563,5 @@
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
-
+        
     end module oclWrapper

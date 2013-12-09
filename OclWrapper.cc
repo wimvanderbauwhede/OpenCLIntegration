@@ -8,11 +8,61 @@
 // ----------------------------------------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------------------------------------
-OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts) :
-#ifdef GPU
+
+OclWrapper::OclWrapper () :
+kernel_opts(""),
+#ifdef DEV_GPU
+useCPU(false),
 useGPU(true),
+useACC(false),
 #else
+#ifdef DEV_ACC
+useCPU(false),
 useGPU(false),
+useACC(true),
+#else
+useCPU(true),
+useGPU(false),
+useACC(false),
+#endif
+#endif
+nPlatforms(0), ncalls(0) {
+//std::cout << "Default constructor\n";
+	    // First check the Platform
+		cl::Platform::get(&platformList);
+		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
+#ifdef VERBOSE
+//		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
+#endif
+		nPlatforms=platformList.size();
+#ifdef PLATINFO
+		for (unsigned int i=0;i<platformList.size();i++) {
+			platformInfo.show(platformList,i);
+		}
+#endif
+
+		selectDevice();
+		createQueue();
+        initArgStatus();
+//std::cout << "Default constructor DONE\n";
+        
+    }
+
+OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts) :
+#ifdef DEV_GPU
+useCPU(false),
+useGPU(true),
+useACC(false),
+#else
+#ifdef DEV_ACC
+useCPU(false),
+useGPU(false),
+useACC(true),
+#else
+useCPU(true),
+useGPU(false),
+useACC(false),
+#endif
 #endif
 nPlatforms(0), ncalls(0) {
 
@@ -20,7 +70,7 @@ nPlatforms(0), ncalls(0) {
 		cl::Platform::get(&platformList);
 		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
 #ifdef VERBOSE
-		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
+//		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
 #endif
 		nPlatforms=platformList.size();
 #ifdef PLATINFO
@@ -36,10 +86,20 @@ nPlatforms(0), ncalls(0) {
 }
 
 void OclWrapper::initOclWrapper(const char* ksource, const char* kname, const char* kopts)  {
-#ifdef GPU
+#ifdef DEV_GPU
+useCPU=false;
 useGPU=true;
+useACC=false;
 #else
+#ifdef DEV_ACC
+useCPU=false;
 useGPU=false;
+useACC=true;
+#else
+useCPU=true;
+useGPU=false;
+useACC=false;
+#endif
 #endif
 
 
@@ -60,42 +120,37 @@ useGPU=false;
 #endif
 
 	selectDevice();
-	loadKernel( ksource,  kname, kopts);
+	if (strcmp(kopts,"")==0) {
+		 std::string stlstr=kernelOpts.str();
+		 kernel_opts = stlstr.c_str();
+		 std::cout << "initOclWrapper: KERNEL_OPTS: "<<kernel_opts << "\n";
+//std::cout << "initOclWrapper: "<<ksource<<";"<<kname<<"\n";
+		 loadKernel( ksource,  kname, kernel_opts);
+			std::cout << "initOclWrapper: loaded kernel\n";
+	} else {
+		loadKernel( ksource,  kname, kopts);
+	}
 	createQueue();
+//			std::cout << "initOclWrapper: created queue\n";
     initArgStatus();
+//			std::cout << "initOclWrapper: initialised ArgStatus\n";
 }
-OclWrapper::OclWrapper () :
-#ifdef GPU
-useGPU(true),
-#else
-useGPU(false),
-#endif
-nPlatforms(0), ncalls(0) {
-
-	    // First check the Platform
-		cl::Platform::get(&platformList);
-		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
-#ifdef VERBOSE
-		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
-#endif
-		nPlatforms=platformList.size();
-#ifdef PLATINFO
-		for (unsigned int i=0;i<platformList.size();i++) {
-			platformInfo.show(platformList,i);
-		}
-#endif
-
-		selectDevice();
-		createQueue();
-        initArgStatus();
-        
-    }
 
 OclWrapper::OclWrapper (int devIdx) :
-#ifdef GPU
+#ifdef DEV_GPU
+useCPU(false),
 useGPU(true),
+useACC(false),
 #else
+#ifdef DEV_ACC
+useCPU(false),
 useGPU(false),
+useACC(true),
+#else
+useCPU(true),
+useGPU(false),
+useACC(false),
+#endif
 #endif
 		nPlatforms(0) {
 
@@ -137,6 +192,21 @@ useGPU(false),
 // ----------------------------------------------------------------------------------------
 // Other public methods
 // ----------------------------------------------------------------------------------------
+
+void OclWrapper::setKernelOpts() {
+
+    std::string stlstr=kernelOpts.str();
+    kernel_opts = stlstr.c_str();
+	std::cout << "setKernelOpts: KERNEL_OPTS: "<<kernel_opts << "\n";
+}
+
+bool OclWrapper::hasACC(int i) {
+
+	const cl::Platform& platform=platformList[i];
+//	cl::vector<cl::Device> gpus;
+	cl_int err= platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
+	return (err!=CL_DEVICE_NOT_FOUND);
+}
 bool OclWrapper::hasGPU(int i) {
 
 	const cl::Platform& platform=platformList[i];
@@ -157,6 +227,8 @@ int OclWrapper::nDevices(int pIdx, std::string devt) {
 		platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
 	} else if (devt=="CPU") {
 		platform.getDevices(CL_DEVICE_TYPE_CPU, &devices);
+	} else if (devt=="ACC") {
+		platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
 	} else {
 		platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 	}
@@ -171,20 +243,51 @@ int OclWrapper::nDevices(int pIdx, std::string devt) {
 	return nDevs;
 }
 void OclWrapper::selectGPU() {
+	useCPU=false;
+	useACC=false;
 	useGPU=true;
 	selectDevice();
 }
 
 void OclWrapper::selectCPU() {
 	useGPU=false;
+	useCPU=true;
+	useACC=false;
 	selectDevice();
 }
 
-void OclWrapper::selectDevice(int pIdx, int dIdx, bool gpu) {
+void OclWrapper::selectACC() {
+	useGPU=false;
+	useCPU=false;
+	useACC=true;
+	selectDevice();
+}
+
+void OclWrapper::selectDevice(int pIdx, int dIdx, DeviceType devt) {
     // Use the platform info as input for the Context
 	platformIdx=pIdx;
 	deviceIdx=dIdx;
-	useGPU=gpu;
+	switch (devt) {
+		case GPU: {
+				  useCPU=false;
+				  useACC=false;
+				  useGPU=true;
+				  break;
+			  }
+		case CPU: {
+				  useGPU=false;
+				  useCPU=true;
+				  useACC=false;
+				  break;
+			  }
+
+		case ACC: {
+				  useGPU=false;
+				  useCPU=false;
+				  useACC=true;
+				  break;
+			  }
+	};
 	getContextAndDevices();
 #ifdef DEVINFO
     deviceInfo.show(devices[deviceIdx]);
@@ -195,19 +298,24 @@ void OclWrapper::selectDevice(int pIdx, int dIdx, bool gpu) {
 void OclWrapper::selectDevice() {
 
 	// So we must first select the platform that has a GPU, then the device that is a GPU
-	bool useCPU = not useGPU;
+	//bool useCPU = not useGPU;
 	platformIdx=0;
 	deviceIdx=0;
 
 	for (unsigned int i=0; i<platformList.size();i++) {
 
-		if ((useGPU && hasGPU(i)) || (useCPU && hasCPU(i))) {
+		if ((useGPU && hasGPU(i)) 
+				|| (useCPU && hasCPU(i))
+				|| (useACC && hasACC(i))
+		   ) {
 			platformIdx=i;
 #ifdef DEVINFO
 			std::cout << "Found platform "<<platformIdx<< " for ";
 			if (useGPU) {
 				std::cout << "GPU" <<"\n";
-			} else {
+			} else if (useACC) {
+				std::cout << "ACC" << "\n";
+			} else if (useCPU) {
 				std::cout << "CPU" << "\n";
 			}
 #endif
@@ -218,7 +326,10 @@ void OclWrapper::selectDevice() {
 	getContextAndDevices();
 
 	for (unsigned int i=0;i<devices.size();i++) {
-		if ( (useGPU && deviceInfo.isGPU(devices[i])) || (useCPU && deviceInfo.isCPU(devices[i])) ) {
+		if ( (useGPU && deviceInfo.isGPU(devices[i])) 
+		|| (useCPU && deviceInfo.isCPU(devices[i])) 
+		|| (useACC && deviceInfo.isACC(devices[i])) 
+		) {
 			deviceIdx=i;
 			break;
 		}
@@ -233,13 +344,16 @@ void OclWrapper::selectDevice() {
 void OclWrapper::selectDevice(int devIdx) {
 
 	// So we must first select the platform that has a GPU, then the device that is a GPU
-	bool useCPU = not useGPU;
+	//bool useCPU = not useGPU;
 	platformIdx=0;
-    deviceIdx=0;
+	deviceIdx=0;
 
 	for (unsigned int i=0; i<platformList.size();i++) {
 
-		if ((useGPU && hasGPU(i)) || (useCPU && hasCPU(i))) {
+		if ((useGPU && hasGPU(i)) 
+				|| (useCPU && hasCPU(i))
+				|| (useACC && hasACC(i))
+		   ) {
 			platformIdx=i;
 			break;
 		}
@@ -247,15 +361,20 @@ void OclWrapper::selectDevice(int devIdx) {
 	if (devIdx==-1) {
         //std::cout << "Automatic device selection: ";
 		for (unsigned int i=0;i<devices.size();i++) {
-			if ( (useGPU && deviceInfo.isGPU(devices[i])) || (useCPU && deviceInfo.isCPU(devices[i])) ) {
+			if ( (useGPU && deviceInfo.isGPU(devices[i])) 
+		|| (useCPU && deviceInfo.isCPU(devices[i])) 
+		|| (useACC && deviceInfo.isACC(devices[i])) 
+		) {
 				deviceIdx=i;
 #ifdef DEVINFO
 				std::cout << "Found platform "<<platformIdx<< " for ";
 				if (useGPU) {
 					std::cout << "GPU " <<deviceIdx<<"\n";
-				} else { 
-					std::cout << "CPU " <<deviceIdx<< "\n";
-				}
+				} else if (useACC) {
+					std::cout << "ACC" << "\n";
+				} else if (useCPU) {
+					std::cout << "CPU" << "\n";
+				} 
 #endif
 				break;
 			}
@@ -321,14 +440,21 @@ void OclWrapper::loadBinary(const char* ksource) {
             );
 
     cl::Program::Binaries binaries(1, std::make_pair(prog.c_str(), prog.length()+1));
+#ifdef OCLV2
+    std::vector<cl_int> binaryStatus;
+#else
     cl::vector<cl_int> binaryStatus;
+#endif    
     program_p = new cl::Program(*context_p, devices, binaries, &binaryStatus, &err);
     checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::Program() from Binary");
 }
 
 void OclWrapper::storeBinary(const char* ksource) {
+#ifdef OCLV2
+	std::vector<char*> binaries;
+#else
 	cl::vector<char*> binaries;
-
+#endif
 	err = program_p->getInfo(CL_PROGRAM_BINARIES,&binaries);
 	checkErr(err, "Program::getInfo(CL_PROGRAM_BINARIES)");
 	// Now write this binary to a file
@@ -356,12 +482,12 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* opts) {
-//    std::cout << "buildProgram\n";
+    std::cout << "buildProgram <" << ksource << ">\n";
 	buildProgram(ksource,opts);
-//    std::cout << "new Kernel\n";
+    std::cout << "new Kernel <"<< kname <<">\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
-    checkErr(err, "Kernel::Kernel()");
+    checkErr(err, "loadKernel::Kernel()");
 }
 
 
@@ -386,7 +512,6 @@ void OclWrapper::setArg(unsigned int idx, const int buf) {
     checkErr(err, "Kernel::setArg()");
 }
 
-#ifndef OCLV2
 int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
     if ((void*)queue_p==NULL) {
@@ -409,8 +534,8 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     // When calling from Fortran, the next line gives the error:
     // mataccF(3498,0x7fff70c14cc0) malloc: *** error for object 0x1000d1840: pointer being freed was not allocated
     // *** set a breakpoint in malloc_error_break to debug
-//    const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
-//    std::cout << infostr <<"\n";
+    //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
+    //std::cout << infostr <<"\n";
 #endif // VERBOSE
 	err = queue_p->enqueueNDRangeKernel(
             *kernel_p,
@@ -431,8 +556,12 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 	ncalls++;
 // VERBOSE
 	//std::cout << "# kernel calls: "<<ncalls <<std::endl;
+#ifndef OCLV2
 	runKernel=kernel_p->bind(*queue_p,globalRange, localRange);
 	kernel_functor=runKernel;
+#else
+	runKernel=bindKernel(*kernel_p,*queue_p,globalRange, localRange);
+#endif	
 	return ncalls;
 }
 
@@ -445,12 +574,14 @@ int OclWrapper::enqueueNDRangeOffset(const cl::NDRange& offset,const cl::NDRange
 	ncalls++;
 // VERBOSE
 	//std::cout << "# kernel calls: "<<ncalls <<std::endl;
+#ifndef OCLV2
 	runKernel=kernel_p->bind(*queue_p,offset,globalRange, localRange);
 	kernel_functor=runKernel;
+#else
+	runKernel=bindKernel(*kernel_p,*queue_p,offset,globalRange, localRange);
+#endif	
 	return ncalls;
 }
-
-#endif
 //cl::Buffer* OclWrapper::makeStaticWriteBuffer(int idx,int bufSize) {
 //	 buf[idx]= cl::Buffer(
 //	            *context_p,
@@ -502,6 +633,34 @@ cl::Buffer& OclWrapper::makeReadWriteBuffer(int bufSize,void* hostBuf, cl_mem_fl
 	            *context_p,
 	            flags,
 	            bufSize,hostBuf,&err);
+	 checkErr(err, "makeReadBuffer()");
+     cl::Buffer& buf_r=*buf_p;
+	return buf_r;
+}
+
+cl::Buffer& OclWrapper::makeReadBuffer(int bufSize,const void* hostBuf, cl_mem_flags flags) {
+    if (hostBuf!=NULL && flags==CL_MEM_READ_ONLY) {
+     flags=CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR;
+    }
+    void* t_hostBuf = (void*)hostBuf;
+	 cl::Buffer* buf_p= new cl::Buffer(
+	            *context_p,
+	            flags,
+	            bufSize,t_hostBuf,&err);
+	 checkErr(err, "makeReadBuffer()");
+     cl::Buffer& buf_r=*buf_p;
+	return buf_r;
+}
+
+cl::Buffer& OclWrapper::makeReadWriteBuffer(int bufSize,const void* hostBuf, cl_mem_flags flags) {
+    if (hostBuf!=NULL && flags==CL_MEM_READ_WRITE) {
+     flags=CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR;
+    }
+    void* t_hostBuf = (void*)hostBuf;
+	 cl::Buffer* buf_p= new cl::Buffer(
+	            *context_p,
+	            flags,
+	            bufSize,t_hostBuf,&err);
 	 checkErr(err, "makeReadBuffer()");
      cl::Buffer& buf_r=*buf_p;
 	return buf_r;
@@ -570,6 +729,36 @@ void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, bool blocking_read,
 	checkErr(err, "CommandQueue::enqueueReadBuffer()");
 
 }
+
+
+void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, int bufSize, const void* hostBuf) {
+
+	err = queue_p->enqueueReadBuffer(
+	            deviceBuf,
+	            CL_TRUE,
+	            0,
+	            bufSize,
+	            (void*)hostBuf);
+    checkErr(err, "CommandQueue::enqueueReadBuffer()");
+
+}
+
+void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, bool blocking_read,
+		::size_t offset, ::size_t bufSize, const void * hostBuf,
+		const VECTOR_CLASS<cl::Event> * events,
+		cl::Event * event) {
+	err = queue_p->enqueueReadBuffer(
+			deviceBuf,
+			blocking_read,
+			offset,
+			bufSize,
+			(void*)hostBuf,
+			events,
+			event);
+
+	checkErr(err, "CommandQueue::enqueueReadBuffer()");
+
+}
 /*
 void OclWrapper::writeBuffer1( int bufSize, void* hostBuf) {
 
@@ -611,6 +800,34 @@ void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, bool blocking_write,
 	checkErr(err, "CommandQueue::enqueueWriteBuffer()");
 
 }
+void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, int bufSize, const void* hostBuf) {
+//    std::cout << queue_p<<"\n";
+	err = queue_p->enqueueWriteBuffer(
+	            deviceBuf,
+	            CL_TRUE,
+	            0,
+	            bufSize,
+	            (void*)hostBuf);
+	checkErr(err, "CommandQueue::enqueueWriteBuffer()");
+
+}
+
+void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, bool blocking_write,
+		::size_t offset, ::size_t bufSize, const void * hostBuf,
+		const VECTOR_CLASS<cl::Event> * events,
+		cl::Event * event) {
+	err = queue_p->enqueueWriteBuffer(
+			deviceBuf,
+			blocking_write,
+			offset,
+			bufSize,
+			(void*)hostBuf,
+			events,
+			event);
+
+	checkErr(err, "CommandQueue::enqueueWriteBuffer()");
+
+}
 
 void OclWrapper::writeBufferPos(int argpos, int bufSize, void* hostBuf) {
     OclWrapper::writeBuffer(*buf[argpos], bufSize, hostBuf);
@@ -636,7 +853,17 @@ void OclWrapper::getContextAndDevices() {
 		} else  {
 			checkErr(CL_FALSE, "Platform has no GPU");
 		}
-	} else	{
+	} else	if (useACC) {
+		if (hasACC(platformIdx) ) {
+#ifdef VERBOSE
+			std::cerr << "\nUsing ACC\n";
+#endif
+			context_p = new cl::Context(CL_DEVICE_TYPE_ACCELERATOR, cprops, NULL, NULL, &err); // CPU-only
+			checkErr(err, "Context::Context()");
+		} else {
+			checkErr(CL_FALSE, "Platform has no ACCELERATOR");
+		}
+	} else	if (useCPU) {
 		if (hasCPU(platformIdx) ) {
 #ifdef VERBOSE
 			std::cerr << "\nUsing CPU\n";
@@ -646,6 +873,8 @@ void OclWrapper::getContextAndDevices() {
 		} else {
 			checkErr(CL_FALSE, "Platform has no CPU");
 		}
+	} else {
+			checkErr(CL_FALSE, "Platform not supported (can't find OpenCL device)");
 	}
 
 	getDevices();
@@ -663,10 +892,27 @@ void OclWrapper::initArgStatus (void) {
         argStatus[i]=0;
     }
 }
+void OclWrapper::showDeviceInfo() {
+	return deviceInfo.show(devices[deviceIdx]);
+}
 
 int OclWrapper::getMaxComputeUnits() {
 	return deviceInfo.max_compute_units(devices[deviceIdx]);
 }
+
+int OclWrapper::getGlobalMemCacheType() {
+	cl_device_mem_cache_type ct = deviceInfo.global_mem_cache_type(devices[deviceIdx]);
+	return (int)ct;
+}
+
+unsigned long int OclWrapper::getGlobalMemSize() {
+	return deviceInfo.global_mem_size(devices[deviceIdx]);
+}
+
+unsigned long int OclWrapper::getLocalMemSize() {
+	return deviceInfo.local_mem_size(devices[deviceIdx]);
+}
+
 
 // ----------------------------------------------------------------------------------------
 // Functions, not part of the class

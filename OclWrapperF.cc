@@ -1,4 +1,3 @@
-
 #include "OclWrapperF.h"
 
 //void* unpack(OclWrapper* ocl) {
@@ -25,9 +24,32 @@
 
 
 extern "C" {
-
 int isbrol (int c) {
-	return !std::isalnum(c) && !(c==46) && !(c==95); // remove anything not alphanum, . or _
+       return !std::isalnum(c) && !(c==46) && !(c==95) ; // remove anything not alphanum, . or _
+}
+
+void oclinitf_(OclWrapperF ocl_ivp,const char* source, int* srclen, const char* kernel, int* klen) {
+//	std::cout <<"init\n";
+// 	bool use_gpu=true;
+//#ifdef CPU
+//	use_gpu=false;
+//#endif
+//	std::cout <<"oclinitf_: kernel=<"<<kernel<<"> len = "<<*klen <<"\n";
+	std::string kstr(kernel);
+	kstr = kstr.substr(0,*klen);
+//	std::cout <<"oclinitf_: kstr=<"<<kstr<<">\n";
+	kernel=kstr.c_str();
+//	std::cout <<"oclinitf_: source=<"<<source<<"> len = " << *srclen <<"\n";
+	std::string sstr(source);
+	sstr = sstr.substr(0,*srclen);
+//	std::cout <<"oclinitf_: sstr=<"<<sstr<<">\n";
+	source=sstr.c_str();
+
+	OclWrapper* ocl = new OclWrapper(source,kernel,KERNEL_OPTS);
+//	std::cout <<"cast\n";
+	*ocl_ivp=toWord<OclWrapper*>(ocl);
+//	std::cout <<ocl_ivp<<"\n";
+//	std::cout <<(*ocl_ivp)<<"\n";
 }
 
 void oclinitc_(OclWrapperF ocl_ivp,const char* source,const char* kernel) {
@@ -36,20 +58,20 @@ void oclinitc_(OclWrapperF ocl_ivp,const char* source,const char* kernel) {
 //#ifdef CPU
 //	use_gpu=false;
 //#endif
-//	std::cout <<"<"<<kernel<<">\n";
+	std::cout <<"oclinitc_: kernel=<"<<kernel<<">\n";
 	std::string kstr(kernel);
 	kstr.erase(std::remove_if(kstr.begin(), kstr.end(), isbrol), kstr.end());
-//	std::cout <<"<"<<kstr<<">\n";
+	std::cout <<"oclinitc_: kstr=<"<<kstr<<">\n";
 	kernel=kstr.c_str();
-//	std::cout <<"<"<<source<<">\n";
+	std::cout <<"oclinitc_: source=<"<<source<<">\n";
 	std::string sstr(source);
 	sstr.erase(std::remove_if(sstr.begin(), sstr.end(), isbrol), sstr.end());
-//	std::cout <<"<"<<sstr<<">\n";
+	std::cout <<"oclinitc_: sstr=<"<<sstr<<">\n";
 //	sstr="matacc.cl"; FIXME!
 	source=sstr.c_str();
 
 	OclWrapper* ocl = new OclWrapper(source,kernel,KERNEL_OPTS);
-//	std::cout <<"cast\n";
+	std::cout <<"cast\n";
 	*ocl_ivp=toWord<OclWrapper*>(ocl);
 //	std::cout <<ocl_ivp<<"\n";
 //	std::cout <<(*ocl_ivp)<<"\n";
