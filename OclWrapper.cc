@@ -78,8 +78,15 @@ nPlatforms(0), ncalls(0) {
 			platformInfo.show(platformList,i);
 		}
 #endif
-
+#ifdef DEVIDX
+#if DEVIDX != -1        
+		selectDevice( DEVIDX );
+#else        
 		selectDevice();
+#endif       
+#else
+		selectDevice();
+#endif        
 		loadKernel( ksource,  kname, kopts);
 		createQueue();
         initArgStatus();
@@ -170,7 +177,7 @@ useACC(false),
 		selectDevice(devIdx);
 		createQueue();
         initArgStatus();
-    }
+    };
 
 //OclWrapper::OclWrapper () : nPlatforms(0) {
 //	    // First check the Platform
