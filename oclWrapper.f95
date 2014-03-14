@@ -1,3 +1,4 @@
+!!! Don't edit this file!!! Edit oclWrapper_TEMPL.f95 and run gen_F95_wrapper_subs.pl !!!
     module oclWrapper
         implicit none
         integer(8) :: ocl
@@ -9,13 +10,18 @@
         contains
 
 !        subroutine oclInit(srcstr,srclen,kstr,klen)
-        subroutine oclInit(srcstr,kstr)   
+        subroutine oclInit(srcstrp,kstrp)   
             integer :: srclen, klen
+            character(len=*) :: srcstrp, kstrp
             character(len=:), allocatable :: srcstr, kstr
+            srclen = len(srcstrp)
+            klen = len(kstrp)
 !            character(srclen) :: srcstr 
 !            character(klen) :: kstr 
             allocate(character(len=srclen) :: srcstr)
             allocate(character(len=klen) :: kstr)
+            srcstr=srcstrp
+            kstr=kstrp
 !            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
             call oclinitf(ocl, srcstr, srclen, kstr, klen)
         end subroutine

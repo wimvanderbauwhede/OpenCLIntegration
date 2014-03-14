@@ -537,11 +537,29 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
     //std::cout << infostr <<"\n";
 #endif // VERBOSE
-	err = queue_p->enqueueNDRangeKernel(
-            *kernel_p,
-            cl::NullRange,
-	    globalRange,localRange,
-	    NULL,&event);
+
+    bool zeroGlobalRange = false;
+    if (       
+            globalRange[0]==0
+            || (globalRange.dimensions()>=2 && globalRange[1]==0)
+            || (globalRange.dimensions()==3 && globalRange[2]==0)
+       ) {
+        zeroGlobalRange = true;
+    }
+    if (zeroGlobalRange) {
+        std::cerr << "WARNING: GlobalRange is 0!\n";
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                cl::NullRange,localRange,
+                NULL,&event);
+    } else {
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                globalRange,localRange,
+                NULL,&event);
+    }
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
 
     return ncalls;

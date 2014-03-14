@@ -17,6 +17,7 @@ sub gen_szstr {
 
 open my $IN, '<', 'oclWrapper_TEMPL.f95';
 open my $OUT, '>', 'oclWrapper.f95';
+        print $OUT "!!! Don't edit this file!!! Edit oclWrapper_TEMPL.f95 and run $0 !!!\n";
 
 while (my $line = <$IN> ){
     print $OUT $line;
