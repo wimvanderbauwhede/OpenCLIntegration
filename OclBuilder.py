@@ -41,26 +41,30 @@ def initOcl(*envt):
     *dyn=0|1 [0] build a dynamic Library             OclBuilder.useDyn
     *plat=AMD|NVIDIA|Intel|MIC [NVIDIA]
     *dev=CPU|GPU|ACC [GPU] device
+     gpu=-1|0|1 [-1, means automatic selection]
+     acc=-1|0|1 [-1, means automatic selection]
+     O=[gcc -O flag] [3]
+     F=0|1 [0] use the functional (non-OO) interface OclBuilder.useF
+     V=1.1|1.2 [1.2] OpenCL C++ API version
+     info=0|1                                        (DEVINFO, PLATINFO)
+    *oclwrapper=0|1 [1] use the OclWrapper API       OclBuilder.useOclWrapper
+
+    The following flags can be used to define macros in your code, they are passed on to the OpenCL kernel as well.
      kernel=<number> [1]                             KERNEL   
      sel=<number> [1] generic selection flag         SELECT
-     w=<number> [1024]   matrix width                WIDTH 
+     w=<number> [1024] width, e.g. for matrix        WIDTH 
+     wx,wy,wz=<number> [128,128,64] x/y/z dimensions WX,WY,WZ
      nth=<number> [1] number of threads per core     NTH
      ngroups=<number> [0] number of workgroups		 NGROUPS
-    *kopts=<string> kernel options, can only be a single alphanumeric string 
-                    if you need complex options, put them in the Scons script
+     order=<number> [1] loop order			        LOOP_ORDER 
      ref=0|1|2 [1]     reference 2=ref only          REF
      v=0|1 [1]         verbose                       VERBOSE 
      mode=0|1|2   COPY|COPY+ALLOC|USE 
-     info=0|1                                        (DEVINFO, PLATINFO)
-     gpu=-1|0|1 [-1, means automatic selection]
-     acc=-1|0|1 [-1, means automatic selection]
      dbg=0|1 [0]                                     OCLDBG
-     O=[gcc -O flag] [3]
      nruns= [1]                                      NRUNS
-     D=[comma-sep list of macros]
-     F=0|1 [0] use the functional (non-OO) interface OclBuilder.useF
-     V=1.1|1.2 [1.2] OpenCL C++ API version
-    *oclwrapper=0|1 [1] use the OclWrapper API       OclBuilder.useOclWrapper
+    *kopts=<string> kernel options, can only be a single alphanumeric string 
+                    if you need complex options, put them in the Scons script
+     D=[comma-sep list of macros, without values]
 
     The options marked with * can be set as OclBuilder.OPTION=VALUE in the SCons script
     The macros controlled by the other options are listed on the right
@@ -129,8 +133,8 @@ def initOcl(*envt):
     devidxflag='-DDEVIDX=-1'
     if gpu!='-1':
     	devidxflag='-DDEVIDX='+gpu
-        dev='GPU'
-        
+        dev='GPU'    
+
     if acc!='-1':
     	devidxflag='-DDEVIDX='+acc
         dev='ACC'
@@ -139,14 +143,22 @@ def initOcl(*envt):
     sel=getOpt('sel','SELECT','1')
     nth=getOpt('nth','#threads','1')
     ngroups=getOpt('ngroups','#workgroups','0')
+    loop_order=getOpt('order','loop order','1')
     if not 'kopts' in globals():
         kopts=getOpt('kopts','OpenCL kernel compilation options. Can only be a single alphanumeric string.','-cl-fast-relaxed-math')
     nruns=getOpt('nruns','Number of runs','1')
     width=getOpt('w','Width','1024')
+    wx=getOpt('wx','X-width','128')
+    wy=getOpt('wy','Y-width','128')
+    wz=getOpt('wz','Z-width','64')
     env.Append(KERNEL_OPTS=['-DKERNEL='+kernel])
     env.Append(KERNEL_OPTS=['-DSELECT='+sel])
     env.Append(KERNEL_OPTS=['-DNTH='+nth])
     env.Append(KERNEL_OPTS=['-DWIDTH='+width])
+    env.Append(KERNEL_OPTS=['-DWX='+wx])
+    env.Append(KERNEL_OPTS=['-DWY='+wy])
+    env.Append(KERNEL_OPTS=['-DWZ='+wz])
+    env.Append(KERNEL_OPTS=['-DLOOP_ORDER='+loop_order])
     ref=getOpt('ref','Reference','1')
     refflag='-DREF'
 
