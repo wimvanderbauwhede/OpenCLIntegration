@@ -46,6 +46,7 @@ def initOcl(*envt):
      w=<number> [1024]   matrix width                WIDTH 
      nth=<number> [1] number of threads per core     NTH
      ngroups=<number> [0] number of workgroups		 NGROUPS
+     order=<number> [1] loop order			LOOP_ORDER 
     *kopts=<string> kernel options, can only be a single alphanumeric string 
                     if you need complex options, put them in the Scons script
      ref=0|1|2 [1]     reference 2=ref only          REF
@@ -132,6 +133,7 @@ def initOcl(*envt):
     sel=getOpt('sel','SELECT','1')
     nth=getOpt('nth','#threads','1')
     ngroups=getOpt('ngroups','#workgroups','0')
+    loop_order=getOpt('order','loop order','1')
     if not 'kopts' in globals():
         kopts=getOpt('kopts','OpenCL kernel compilation options. Can only be a single alphanumeric string.','-cl-fast-relaxed-math')
     nruns=getOpt('nruns','Number of runs','1')
@@ -140,6 +142,7 @@ def initOcl(*envt):
     env.Append(KERNEL_OPTS=['-DSELECT='+sel])
     env.Append(KERNEL_OPTS=['-DNTH='+nth])
     env.Append(KERNEL_OPTS=['-DWIDTH='+width])
+    env.Append(KERNEL_OPTS=['-DLOOP_ORDER='+loop_order])
     ref=getOpt('ref','Reference','1')
     refflag='-DREF'
 
