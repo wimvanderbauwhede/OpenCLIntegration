@@ -371,9 +371,9 @@ void OclWrapper::selectDevice(int devIdx) {
 				if (useGPU) {
 					std::cout << "GPU " <<deviceIdx<<"\n";
 				} else if (useACC) {
-					std::cout << "ACC" << "\n";
+					std::cout << "ACC " << deviceIdx <<"\n";
 				} else if (useCPU) {
-					std::cout << "CPU" << "\n";
+					std::cout << "CPU " << deviceIdx << "\n";
 				} 
 #endif
 				break;
@@ -389,7 +389,7 @@ void OclWrapper::selectDevice(int devIdx) {
 	std::cout << "Device Info for Platform "<<platformIdx << ", Device "<<deviceIdx<<"\n";
 	deviceInfo.show(devices[deviceIdx]);
 #endif
-}
+} // END of selectDevice()
 
 void OclWrapper::buildProgram(const char* ksource, const char* opts) {
     std::ifstream file(ksource);
