@@ -53,6 +53,7 @@ def initOcl(*envt):
      mode=0|1|2   COPY|COPY+ALLOC|USE 
      info=0|1                                        (DEVINFO, PLATINFO)
      gpu=-1|0|1 [-1, means automatic selection]
+     acc=-1|0|1 [-1, means automatic selection]
      dbg=0|1 [0]                                     OCLDBG
      O=[gcc -O flag] [3]
      nruns= [1]                                      NRUNS
@@ -124,9 +125,15 @@ def initOcl(*envt):
 #            print 'NVIDIA'
     env['KERNEL_OPTS']=[]    
     gpu=getOpt('gpu','GPU','-1')
-    devidxflag='-DDEVIDX='+gpu
+    acc=getOpt('acc','ACC','-1')
+    devidxflag='-DDEVIDX=-1'
     if gpu!='-1':
+    	devidxflag='-DDEVIDX='+gpu
         dev='GPU'
+        
+    if acc!='-1':
+    	devidxflag='-DDEVIDX='+acc
+        dev='ACC'
         
     kernel=getOpt('kernel','KERNEL','1')
     sel=getOpt('sel','SELECT','1')
