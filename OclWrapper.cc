@@ -78,8 +78,15 @@ nPlatforms(0), ncalls(0) {
 			platformInfo.show(platformList,i);
 		}
 #endif
-
+#ifdef DEVIDX
+#if DEVIDX != -1        
+		selectDevice( DEVIDX );
+#else        
 		selectDevice();
+#endif       
+#else
+		selectDevice();
+#endif        
 		loadKernel( ksource,  kname, kopts);
 		createQueue();
         initArgStatus();
@@ -170,7 +177,7 @@ useACC(false),
 		selectDevice(devIdx);
 		createQueue();
         initArgStatus();
-    }
+    };
 
 //OclWrapper::OclWrapper () : nPlatforms(0) {
 //	    // First check the Platform
@@ -482,9 +489,9 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* opts) {
-    std::cout << "buildProgram <" << ksource << ">\n";
+    //std::cout << "buildProgram <" << ksource << ">\n";
 	buildProgram(ksource,opts);
-    std::cout << "new Kernel <"<< kname <<">\n";
+    //std::cout << "new Kernel <"<< kname <<">\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
     checkErr(err, "loadKernel::Kernel()");
@@ -537,11 +544,29 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
     //std::cout << infostr <<"\n";
 #endif // VERBOSE
-	err = queue_p->enqueueNDRangeKernel(
-            *kernel_p,
-            cl::NullRange,
-	    globalRange,localRange,
-	    NULL,&event);
+
+    bool zeroGlobalRange = false;
+    if (       
+            globalRange[0]==0
+            || (globalRange.dimensions()>=2 && globalRange[1]==0)
+            || (globalRange.dimensions()==3 && globalRange[2]==0)
+       ) {
+        zeroGlobalRange = true;
+    }
+    if (zeroGlobalRange) {
+        std::cerr << "WARNING: GlobalRange is 0!\n";
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                cl::NullRange,localRange,
+                NULL,&event);
+    } else {
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                globalRange,localRange,
+                NULL,&event);
+    }
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
 
     return ncalls;
