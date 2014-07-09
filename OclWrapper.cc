@@ -520,6 +520,7 @@ void OclWrapper::setArg(unsigned int idx, const int buf) {
 }
 
 int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
+    std::cout << "enqueueNDRangeRun( )\n";
 	// Create the CommandQueue
     if ((void*)queue_p==NULL) {
 #ifdef VERBOSE
@@ -530,8 +531,9 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     }
 	ncalls++;
 // VERBOSE
-//	std::cout << "# kernel calls: "<<ncalls <<std::endl;
-	cl::Event event;
+	std::cout << "# kernel calls: "<<ncalls <<std::endl;
+	//cl::Event* event = new cl::Event;
+	cl::Event event; 
 //	std::cout << "ocl:"<<this<<"\n";
 //    std::cout << "queue_p:"<<queue_p<<"\n";
 //    std::cout << "kernel_p:"<<kernel_p<<"\n";
@@ -561,14 +563,100 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
                 cl::NullRange,localRange,
                 NULL,&event);
     } else {
+        std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
         err = queue_p->enqueueNDRangeKernel(
                 *kernel_p,
                 cl::NullRange,
                 globalRange,localRange,
                 NULL,&event);
     }
+    std::cout<<"call to event.wait()\n";
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+    std::cout << "done waiting\n";
+    //delete event;
+    return ncalls;
+}
+int OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localRange) {
+    std::cout << "enqueueNDRangeRun( pointers )\n";
+	// Create the CommandQueue
+    if ((void*)queue_p==NULL) {
+#ifdef VERBOSE
+			std::cout<<"Creating queue...\n";
+#endif
+			queue_p = new cl::CommandQueue(*context_p, devices[deviceIdx], 0, &err);
+            checkErr(err, "CommandQueue::CommandQueue()");
+    }
+	ncalls++;
+// VERBOSE
+	std::cout << "# kernel calls: "<<ncalls <<std::endl;
+	//cl::Event* event = new cl::Event;
+	cl::Event event; 
+//	std::cout << "ocl:"<<this<<"\n";
+//    std::cout << "queue_p:"<<queue_p<<"\n";
+//    std::cout << "kernel_p:"<<kernel_p<<"\n";
+//    std::cout << "FIXME! enqueueNDRangeKernel is commented out!\n";
+    // the kernel can be queried successfully ...
+#ifdef VERBOSE
+    // When calling from Fortran, the next line gives the error:
+    // mataccF(3498,0x7fff70c14cc0) malloc: *** error for object 0x1000d1840: pointer being freed was not allocated
+    // *** set a breakpoint in malloc_error_break to debug
+    //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
+    //std::cout << infostr <<"\n";
+#endif // VERBOSE
 
+    bool zeroGlobalRange = false;
+    if (       
+            globalRange==0
+       ) {
+        zeroGlobalRange = true;
+    }
+    bool zeroLocalRange = false;
+    if (       
+            localRange==0
+       ) {
+        zeroLocalRange = true;
+    }
+    if (zeroLocalRange) {
+    if (zeroGlobalRange) {
+        std::cerr << "WARNING: GlobalRange is 0!\n";
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                cl::NullRange,cl::NullRange,
+                NULL,&event);
+    } else {
+        std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                //*globalRange,*localRange,
+                cl::NDRange(globalRange),cl::NullRange,
+                NULL,&event);
+    }
+    } else {
+    if (zeroGlobalRange) {
+        std::cerr << "WARNING: GlobalRange is 0!\n";
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                cl::NullRange,cl::NDRange(localRange),
+                NULL,&event);
+    } else {
+        std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
+        err = queue_p->enqueueNDRangeKernel(
+                *kernel_p,
+                cl::NullRange,
+                //*globalRange,*localRange,
+                cl::NDRange(globalRange),cl::NDRange(localRange),
+                NULL,&event);
+    }
+    }
+    std::cout<<"call to event.wait()\n";
+	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+    std::cout << "done waiting\n";
+    //delete event;
     return ncalls;
 }
 

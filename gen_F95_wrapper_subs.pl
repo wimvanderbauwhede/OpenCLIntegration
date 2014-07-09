@@ -55,7 +55,7 @@ while (my $line = <$IN> ){
             integer, dimension($dim):: sz
             $ftype,dimension($szstr) :: array
             sz1d = size(array)*$wordsz 
-			print *, 'oclMake${dim}D${type}Array${mode}Buffer(',sz1d,')'
+			! print *, 'oclMake${dim}D${type}Array${mode}Buffer(',sz1d,')'
             call oclMake${mode}BufferPtrC(ocl,buffer, sz1d, array)
         end subroutine
         ";
