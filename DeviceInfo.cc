@@ -19,6 +19,17 @@ void DeviceInfo::show(const cl::Device& device) {
             err=device.getInfo(infotuple.infocode,&info);
             uint_props[infostr]=info;
             std::cout <<infostr << "\t"<< info << "\n";
+        } else if (infotuple.infotype==SIZE_T ){
+            size_t info;
+            err=device.getInfo(infotuple.infocode,&info);
+            uint_props[infostr]=info;
+            std::cout <<infostr << "\t"<< info << "\n";
+        } else if (infotuple.infotype==SIZE_T_ARR ){
+            size_t info[3];
+            err=device.getInfo(infotuple.infocode,info);
+            size_t_arr_props[infostr]=info;
+            std::cout <<infostr << "\t"<< info[0] <<","<<info[1]<<","<<info[2]<< "\n";
+            
         } else if (infotuple.infotype==STRING) {
             std::string info;
             err=device.getInfo(infotuple.infocode,&info);
@@ -39,6 +50,19 @@ unsigned int DeviceInfo::max_compute_units(const cl::Device& device) {
 	device.getInfo(infotbl["CL_DEVICE_MAX_COMPUTE_UNITS"].infocode,&info);
 	return info;
 }
+
+size_t DeviceInfo::max_work_group_size(const cl::Device& device) {
+    size_t info;
+	device.getInfo(infotbl["CL_DEVICE_MAX_WORK_GROUP_SIZE"].infocode,&info);
+	return info;
+}
+/*
+size_t* DeviceInfo::max_work_item_sizes(const cl::Device& device) {
+	size_t info[3];
+	device.getInfo(infotbl["CL_DEVICE_MAX_WORK_ITEM_SIZES"].infocode,info);
+	return info;
+}
+*/
 unsigned long int DeviceInfo::local_mem_size(const cl::Device& device) {
 	cl_ulong info;
 	device.getInfo(infotbl["CL_DEVICE_LOCAL_MEM_SIZE"].infocode,&info);

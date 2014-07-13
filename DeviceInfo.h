@@ -13,7 +13,7 @@
 #endif
 
 #endif
-enum InfoType {UINT, ULONG, STRING};
+enum InfoType {UINT, ULONG, STRING,SIZE_T_ARR, UINT_ARR,ULONG_ARR,STRING_ARR, SIZE_T};
 
 class InfoTuple {
     public:
@@ -27,6 +27,8 @@ class DeviceInfo {
     private:
         std::map<std::string,InfoTuple> infotbl;
         std::map<std::string,unsigned int> uint_props;
+        std::map<std::string,unsigned int*> uint_arr_props;
+        std::map<std::string,size_t*> size_t_arr_props;
         std::map<std::string,unsigned long> ulong_props;
         std::map<std::string,std::string> string_props;
     public:
@@ -36,8 +38,8 @@ class DeviceInfo {
         infotbl["CL_DEVICE_VENDOR_ID"]=InfoTuple(CL_DEVICE_VENDOR_ID,UINT);
         infotbl["CL_DEVICE_MAX_COMPUTE_UNITS"]=InfoTuple(CL_DEVICE_MAX_COMPUTE_UNITS,UINT);
         infotbl["CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS"]=InfoTuple(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,UINT);
-        //infotbl["CL_DEVICE_MAX_WORK_GROUP_SIZE"]=InfoTuple(CL_DEVICE_MAX_WORK_GROUP_SIZE,UINT);
-        //infotbl["CL_DEVICE_MAX_WORK_ITEM_SIZES"]=InfoTuple(CL_DEVICE_MAX_WORK_ITEM_SIZES,UINT);
+        infotbl["CL_DEVICE_MAX_WORK_GROUP_SIZE"]=InfoTuple(CL_DEVICE_MAX_WORK_GROUP_SIZE,SIZE_T);
+        //infotbl["CL_DEVICE_MAX_WORK_ITEM_SIZES"]=InfoTuple(CL_DEVICE_MAX_WORK_ITEM_SIZES,SIZE_T_ARR);
         infotbl["CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR"]=InfoTuple(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,UINT);
         infotbl["CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT"]=InfoTuple(CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,UINT);
         infotbl["CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT"]=InfoTuple(CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,UINT);
@@ -84,6 +86,8 @@ class DeviceInfo {
         //infotbl["CL_DEVICE_PLATFORM"]=InfoTuple(CL_DEVICE_PLATFORM,UINT);
     };
     unsigned int max_compute_units(const cl::Device&);
+    size_t max_work_group_size(const cl::Device&);
+    //size_t* max_work_item_sizes(const cl::Device&);
     unsigned long int local_mem_size(const cl::Device&);
     unsigned long global_mem_max_alloc_size(const cl::Device&);
     unsigned long int global_mem_size(const cl::Device&);
