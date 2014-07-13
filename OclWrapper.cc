@@ -1004,6 +1004,22 @@ int OclWrapper::getMaxComputeUnits() {
 	return deviceInfo.max_compute_units(devices[deviceIdx]);
 }
 
+size_t OclWrapper::getPreferredWorkGroupSizeMultiple() {
+    size_t nthreads_hint=0;
+    kernel.getWorkGroupInfo(devices[deviceIdx],CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &nthreads_hint);
+    return nthreads_hint;
+}
+
+size_t OclWrapper::getNThreadsHint() {
+    return getPreferredWorkGroupSizeMultiple();
+}
+
+size_t OclWrapper::getWorkGroupSize() {
+    size_t k_wg_sz = 0;
+    kernel.getWorkGroupInfo(devices[deviceIdx],CL_KERNEL_WORK_GROUP_SIZE,&k_wg_sz);
+    return k_wg_sz;
+}
+
 int OclWrapper::getGlobalMemCacheType() {
 	cl_device_mem_cache_type ct = deviceInfo.global_mem_cache_type(devices[deviceIdx]);
 	return (int)ct;

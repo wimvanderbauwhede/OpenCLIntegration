@@ -142,6 +142,9 @@ class OclWrapper {
 		int getGlobalMemCacheType();
 		unsigned long int getGlobalMemSize();
 		unsigned long int getLocalMemSize();
+        size_t getPreferredWorkGroupSizeMultiple();
+        size_t getNThreadsHint();
+        size_t getWorkGroupSize();
 
 		cl::Buffer& makeWriteBuffer( int bufSize );
 //		cl::Buffer* makeStaticWriteBuffer( int idx,int bufSize );
@@ -202,6 +205,7 @@ class OclWrapper {
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
 		void writeBufferPos(int argpos, int bufSize, void* hostBuf);
+
 };
 
 
