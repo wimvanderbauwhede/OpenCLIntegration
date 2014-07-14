@@ -2,6 +2,7 @@
         implicit none
         integer(8) :: ocl
         integer :: oclNunits
+        integer :: oclNthreadsHint
         integer(8), dimension(32) :: oclBuffers
         integer, dimension(32,3) :: oclBufferShapes
         integer :: oclGlobalRange, oclLocalRange
@@ -25,11 +26,38 @@
             call oclinitf(ocl, srcstr, srclen, kstr, klen)
         end subroutine
 
+        subroutine oclInitOpts(srcstrp,kstrp,koptsstrp)   
+            integer :: srclen, klen, koptslen
+            character(len=*) :: srcstrp, kstrp, koptsstrp
+            character(len=:), allocatable :: srcstr, kstr, koptsstr
+            srclen = len(srcstrp)
+            klen = len(kstrp)
+            koptslen = len(koptsstrp)
+!            character(srclen) :: srcstr 
+!            character(klen) :: kstr 
+            allocate(character(len=srclen) :: srcstr)
+            allocate(character(len=klen) :: kstr)
+            allocate(character(len=koptslen) :: koptsstr)
+            srcstr=srcstrp
+            kstr=kstrp
+            koptsstr = koptsstrp
+!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
+            call oclinitoptsf(ocl, srcstr, srclen, kstr, klen, koptsstr, koptslen)
+        end subroutine        
+
         subroutine oclGetMaxComputeUnits(nunits)
             integer :: nunits
             call oclGetMaxComputeUnitsC(ocl,nunits)
             oclNunits=nunits
         end subroutine
+
+        subroutine oclGetNThreadsHint(nthreads)
+            integer :: nthreads
+            call oclGetNThreadsHintC(ocl,nthreads)
+            oclNthreadsHint=nthreads
+        end subroutine
+
+        
 
         subroutine oclMakeFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
@@ -212,6 +240,14 @@
             sz1d = size(array1d)*4 ! x4 because integer is 4 bytes
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
+        end subroutine
+
+        subroutine padRange(range, m)
+            integer, intent(InOut) :: range
+            integer, intent(In) :: m
+            if (range % m /= 0) then
+                range = range + (m - (range % m))
+            end if
         end subroutine
 
 !$GEN WrapperSubs

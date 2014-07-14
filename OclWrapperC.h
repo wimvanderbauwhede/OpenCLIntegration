@@ -15,8 +15,11 @@ typedef int64_t* OclWrapperF;
 
 // The minimal API is as follows:
 void oclinitc_(OclWrapperF ocl,const char* source,const char* kernel);
+void oclinitoptsc_(OclWrapperF ocl,const char* source,const char* kernel,const char* kernel_opts);
 void oclinitf_(OclWrapperF ocl,const char* source,int* srclen, const char* kernel, int* klen);
+void oclinitoptsf_(OclWrapperF ocl,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen);
 void oclgetmaxcomputeunitsc_(OclWrapperF ocl,int* nunits);
+void oclgetnthreadshintc_(OclWrapperF ocl,int* nthreads);
 
 void oclmakereadbufferptrc_(OclWrapperF ocl,OclBufferF buffer, int* size, void* ptr);
 void oclmakereadwritebufferptrc_(OclWrapperF ocl,OclBufferF buffer, int* size,void* ptr);
