@@ -1,4 +1,4 @@
-!!! Don't edit this file!!! Edit oclWrapper_TEMPL.f95 and run gen_F95_wrapper_subs.pl !!!
+!!! Don't edit this file!!! Edit oclWrapper_TEMPL.f95 and run ./gen_F95_wrapper_subs.pl !!!
     module oclWrapper
         implicit none
         integer(8) :: ocl
@@ -241,6 +241,14 @@
             sz1d = size(array1d)*4 ! x4 because integer is 4 bytes
             call oclreadbufferc(ocl,buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
+        end subroutine
+
+        subroutine padRange(orig_range, m)
+            integer, intent(InOut) :: orig_range
+            integer, intent(In) :: m
+            if (mod(orig_range,m) /= 0) then
+                orig_range = orig_range + (m - (mod(orig_range,m)))
+            end if
         end subroutine
 
 !$GEN WrapperSubs

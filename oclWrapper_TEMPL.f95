@@ -242,11 +242,11 @@
             array = reshape(array1d,shape(array))
         end subroutine
 
-        subroutine padRange(range, m)
-            integer, intent(InOut) :: range
+        subroutine padRange(orig_range, m)
+            integer, intent(InOut) :: orig_range
             integer, intent(In) :: m
-            if (range % m /= 0) then
-                range = range + (m - (range % m))
+            if (mod(orig_range,m) /= 0) then
+                orig_range = orig_range + (m - (mod(orig_range,m)))
             end if
         end subroutine
 

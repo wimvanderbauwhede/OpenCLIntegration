@@ -87,6 +87,8 @@ nPlatforms(0), ncalls(0) {
 #else
 		selectDevice();
 #endif        
+std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
+        
 		loadKernel( ksource,  kname, kopts);
 		createQueue();
         initArgStatus();

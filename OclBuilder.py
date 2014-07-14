@@ -189,7 +189,7 @@ def initOcl(*envt):
         if env['useDyn']==1:
             useDyn='1'
             
-    optim=getOpt('O','Optimisation','3')
+    optim=getOpt('O','Optimisation','2')
     optflag='-O'+optim
     mode=getOpt('mode','Mode','1')
     memreadflag='-DMRMODE='+mode
@@ -226,8 +226,8 @@ def initOcl(*envt):
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
-    env.Append(CXXFLAGS = ['-std=c++0x','-Wall',dbgflag,dbgmacro,optflag,DEVFLAGS,KERNEL_OPTS]) 
-    env.Append(CFLAGS = ['-Wall',dbgflag,optflag,DEVFLAGS,KERNEL_OPTS])     
+    env.Append(CXXFLAGS = ['-std=c++0x','-Wall',dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+    env.Append(CFLAGS = ['-Wall',dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
     env.Help(help)
 #if useOclWrapper:
 #env.Append(CPPPATH=[OPENCL_DIR,OPENCL_DIR+'/OpenCLIntegration'])    
@@ -260,11 +260,11 @@ def initOcl(*envt):
         if 'FC' in os.environ:
             env['FORTRAN']=os.environ['FC']
             env['F95']=os.environ['FC']
-        if (os.environ['GFORTRAN'] in os.environ and env['FORTRAN'] == os.environ['GFORTRAN']) :
+        if ('GFORTRAN' in os.environ and env['FORTRAN'] == os.environ['GFORTRAN']) :
             env['FORTRANFLAGS']=env['CFLAGS']
-            env.Append(FORTRANFLAGS=['-cpp','-m64','-ffree-form'])
-            env['F95FLAGS']=env['CFLAGS']
-            env.Append(F95FLAGS=['-cpp','-m64','-ffree-form'])
+            env.Append(FORTRANFLAGS=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian'])
+            env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
+            env.Append(F95FLAGS=env['CFLAGS'])
         else:
             env['CFLAGS'].pop(0)
             env['CFLAGS'].pop(0)
