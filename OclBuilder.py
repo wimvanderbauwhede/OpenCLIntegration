@@ -64,7 +64,10 @@ def initOcl(*envt):
      nruns= [1]                                      NRUNS
     *kopts=<string> kernel options, can only be a single alphanumeric string 
                     if you need complex options, put them in the Scons script
-     D=[comma-sep list of macros, without values]
+                    For example, to add a path for kernel includes:
+                    OclBuilder.kopts='-I/abs/path/to/includes'
+
+    D=[comma-sep list of macros, without values]
 
     The options marked with * can be set as OclBuilder.OPTION=VALUE in the SCons script
     The macros controlled by the other options are listed on the right
@@ -83,7 +86,7 @@ def initOcl(*envt):
 
     OPENCL_DIR=os.environ['OPENCL_DIR']
     opts=Variables()        
-
+    CWD= os.environ['PWD']
     args=sys.argv[1:]
     for arg in args:
         if re.match("(\w+)=(\w+)",arg):
