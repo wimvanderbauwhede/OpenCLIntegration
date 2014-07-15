@@ -87,7 +87,7 @@ nPlatforms(0), ncalls(0) {
 #else
 		selectDevice();
 #endif        
-std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
+//        std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
         
 		loadKernel( ksource,  kname, kopts);
 		createQueue();
@@ -400,7 +400,9 @@ void OclWrapper::selectDevice(int devIdx) {
 #endif
 } // END of selectDevice()
 
-void OclWrapper::buildProgram(const char* ksource, const char* opts) {
+void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
+//    std::cout <<"build Program with options <"<< kopts<<">\n";
+    std::string kopts_str(kopts); //WV: UGLY HACK: somehow, kopts gets cleared between here and the invocation otherwise, so I make a copy
     std::ifstream file(ksource);
     checkErr(file.is_open() ? CL_SUCCESS:-1, ksource);
 
@@ -408,14 +410,11 @@ void OclWrapper::buildProgram(const char* ksource, const char* opts) {
             std::istreambuf_iterator<char>(file),
             (std::istreambuf_iterator<char>())
             );
-//    std::cout <<"Program from source\n";
     cl::Program::Sources source(1, std::make_pair(prog.c_str(), prog.length()+1));
-//    std::cout <<"new Program\n";
 
     program_p = new cl::Program(*context_p, source);
-//    program = *program_p;
-//    std::cout <<"build Program\n";
-    err = program_p->build(devices,opts);
+//    std::cout <<"build Program with options <"<< kopts_str<<">\n";
+    err = program_p->build(devices,kopts_str.c_str());
     checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::build()");
 }
 
@@ -491,7 +490,7 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* opts) {
-    //std::cout << "buildProgram <" << ksource << ">\n";
+//    std::cout << "loadKernel <" << ksource << "> with options <"<< opts <<">\n";
 	buildProgram(ksource,opts);
     //std::cout << "new Kernel <"<< kname <<">\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);

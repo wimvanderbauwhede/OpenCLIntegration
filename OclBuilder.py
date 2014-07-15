@@ -211,7 +211,7 @@ def initOcl(*envt):
         dbg_dev=dbgmacro+' '
     else:	
 	    dbg_dev=''
-    kernel_opts='\\"'+kopts+' '+dbg_dev+(' '.join(env['KERNEL_OPTS']))+'\\"'
+    kernel_opts='\\"'+kopts+' -DEXT_DEFS '+dbg_dev+(' '.join(env['KERNEL_OPTS']))+'\\"'
     KERNEL_OPTS=['-DKERNEL_OPTS='+kernel_opts+''] 
     if commands.getoutput("uname") == "Darwin":
         DEVFLAGS+=['-DOSX']    

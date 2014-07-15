@@ -66,8 +66,8 @@ void oclinitoptsf_(OclWrapperF ocl_ivp,const char* source,int* srclen,const char
 	std::string kopts_str(kernel_opts);
     kopts_str =  kopts_str.substr(0,*koptslen);
     std::string kopts_from_builder(KERNEL_OPTS);
-    //kernel_opts = (kopts_str+" "+kopts_from_builder).c_str();
-    kernel_opts = kopts_str.c_str();
+    kernel_opts = (kopts_str+" "+kopts_from_builder).c_str();
+    //kernel_opts = kopts_str.c_str();
 //    std::cout << "FORTRAN_KERNEL_OPTS: "<<kernel_opts<<"\n";
 	OclWrapper* ocl = new OclWrapper(source,kernel,kernel_opts);
 	*ocl_ivp=toWord<OclWrapper*>(ocl);
