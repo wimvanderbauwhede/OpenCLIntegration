@@ -45,7 +45,7 @@ def initOcl(*envt):
      acc=-1|0|1 [-1, means automatic selection]
      O=[gcc -O flag] [3]
      F=0|1 [0] use the functional (non-OO) interface OclBuilder.useF
-     V=1.1|1.2 [1.2] OpenCL C++ API version
+     V=1.1|1.2 [1.1] OpenCL C++ API version
      info=0|1                                        (DEVINFO, PLATINFO)
     *oclwrapper=0|1 [1] use the OclWrapper API       OclBuilder.useOclWrapper
 
@@ -170,7 +170,7 @@ def initOcl(*envt):
     if verbose=='0':
         vflag=''
 
-    version=getOpt('V','Version','1.2')
+    version=getOpt('V','Version','1.1') # FIXME! V1.2 is broken on most platforms
     verflag=''
     if version=='1.2':
         verflag='-DOCLV2'
