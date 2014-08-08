@@ -415,7 +415,12 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
     program_p = new cl::Program(*context_p, source);
 //    std::cout <<"build Program with options <"<< kopts_str<<">\n";
     err = program_p->build(devices,kopts_str.c_str());
-    checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::build()");
+    std::string err_str("Program::build(");
+    err_str+=ksource;
+    err_str+=",";
+    err_str+=kopts;
+    err_str+=")";
+    checkErr(err, err_str);
 }
 
 //void OclWrapper::buildProgram(const char* ksource) {
@@ -490,12 +495,16 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* opts) {
-//    std::cout << "loadKernel <" << ksource << "> with options <"<< opts <<">\n";
+    //std::cerr << "loadKernel <" << ksource << "> with options <"<< opts <<">\n";
 	buildProgram(ksource,opts);
-    //std::cout << "new Kernel <"<< kname <<">\n";
+    //std::cerr << "new Kernel <"<< kname <<">\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
-    checkErr(err, "loadKernel::Kernel()");
+    std::string err_str("loadKernel::Kernel(");
+    err_str+=kname;
+    err_str+=")";
+
+    checkErr(err, err_str.c_str());
 }
 
 
