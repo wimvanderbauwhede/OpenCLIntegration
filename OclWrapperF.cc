@@ -48,7 +48,7 @@ void oclinitf_(OclWrapperF ocl_ivp,const char* source, int* srclen, const char* 
 	sstr = sstr.substr(0,*srclen);
 //	std::cout <<"oclinitf_: sstr=<"<<sstr<<">\n";
 	source=sstr.c_str();
-
+//    std::cout << source<<", "<<kernel<<", "<<KERNEL_OPTS<<"\n";
 	OclWrapper* ocl = new OclWrapper(source,kernel,KERNEL_OPTS);
 //	std::cout <<"cast\n";
 	*ocl_ivp=toWord<OclWrapper*>(ocl);

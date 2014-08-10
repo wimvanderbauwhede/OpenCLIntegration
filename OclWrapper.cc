@@ -401,7 +401,7 @@ void OclWrapper::selectDevice(int devIdx) {
 } // END of selectDevice()
 
 void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
-//    std::cout <<"build Program with options <"<< kopts<<">\n";
+//    std::cout <<"buildProgram(): build Program with options <"<< kopts<<">\n";
     std::string kopts_str(kopts); //WV: UGLY HACK: somehow, kopts gets cleared between here and the invocation otherwise, so I make a copy
     std::ifstream file(ksource);
     checkErr(file.is_open() ? CL_SUCCESS:-1, ksource);
@@ -417,12 +417,11 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
     err = program_p->build(devices,kopts_str.c_str());
     std::string err_str("Program::build(");
     err_str+=ksource;
-    err_str+=",";
+    err_str+=", KOPTS:";
     err_str+=kopts;
     err_str+=")";
     const char* err_cstr =  err_str.c_str();
-
-    checkErr(err, err_cstr);
+    checkErr(err, err_cstr );
 }
 
 //void OclWrapper::buildProgram(const char* ksource) {
