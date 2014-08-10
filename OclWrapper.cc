@@ -420,7 +420,9 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
     err_str+=",";
     err_str+=kopts;
     err_str+=")";
-    checkErr(err, err_str);
+    const char* err_cstr =  err_str.c_str();
+
+    checkErr(err, err_cstr);
 }
 
 //void OclWrapper::buildProgram(const char* ksource) {
