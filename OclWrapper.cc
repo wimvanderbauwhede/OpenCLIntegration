@@ -568,6 +568,7 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     }
     if (zeroGlobalRange) {
         std::cerr << "WARNING: GlobalRange is 0!\n";
+        //std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<< 0 <<","<<localRange<<")\n";
         err = queue_p->enqueueNDRangeKernel(
                 *kernel_p,
                 cl::NullRange,
