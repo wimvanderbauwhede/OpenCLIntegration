@@ -59,6 +59,7 @@ def initOcl(*envt):
      order=<number> [1] loop order			        LOOP_ORDER 
      ref=0|1|2 [1]     reference 2=ref only          REF
      v=0|1 [1]         verbose                       VERBOSE 
+     warn=0|1 [1]      warnings                      WARNINGS
      mode=0|1|2   COPY|COPY+ALLOC|USE 
      dbg=0|1 [0]                                     OCLDBG
      nruns= [1]                                      NRUNS
@@ -170,6 +171,11 @@ def initOcl(*envt):
     if verbose=='0':
         vflag=''
 
+    warnings=getOpt('warn','Warnings','1')
+    wflag='-Wall'
+    if warnings=='0':
+        vflag=''
+
     version=getOpt('V','Version','1.1') # FIXME! V1.2 is broken on most platforms
     verflag=''
     if version=='1.2':
@@ -229,8 +235,8 @@ def initOcl(*envt):
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
-    env.Append(CXXFLAGS = ['-std=c++0x','-Wall',dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
-    env.Append(CFLAGS = ['-Wall',dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
+    env.Append(CXXFLAGS = ['-std=c++0x',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+    env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
     env.Help(help)
 #if useOclWrapper:
 #env.Append(CPPPATH=[OPENCL_DIR,OPENCL_DIR+'/OpenCLIntegration'])    
@@ -266,7 +272,7 @@ def initOcl(*envt):
         if ('GFORTRAN' in os.environ and env['FORTRAN'] == os.environ['GFORTRAN']) :
             env['FORTRANFLAGS']=env['CFLAGS']
             env.Append(FORTRANFLAGS=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian'])
-            env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
+            env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-mcmodel=medium','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
             env.Append(F95FLAGS=env['CFLAGS'])
         else:
             env['CFLAGS'].pop(0)
