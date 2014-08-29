@@ -244,7 +244,7 @@ void oclwritebufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivpa, int* sz,void* arr
 			*buffer,
 			CL_TRUE,
 			0,
-			*sz,
+			(::size_t)*sz,
 			array);
 	/*
 	clEnqueueWriteBuffer ( *(ocl->queue_p->object_), // can't do this: object_ is protected
@@ -275,7 +275,7 @@ void oclreadbufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivpa, int* sz,void* arra
 			*buffer,
 			CL_TRUE,
 			0,
-			*sz,
+			(::size_t)*sz,
 			array);
 }
 
@@ -285,7 +285,7 @@ void oclmakereadbufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz) {
 	cl::Buffer* buf_p= new cl::Buffer(
 	            *(ocl->context_p),
 	            CL_MEM_READ_ONLY ,
-	            *sz,NULL,&err);
+	            (::size_t)*sz,NULL,&err);
 	checkErr(err, "makeReadBuffer()");
 //	void* buf_vp=reinterpret_cast<void*>(buf_p);
 //	int64_t* buf_ip=(int64_t*)buf_vp;
@@ -299,7 +299,7 @@ void oclmakereadbufferptrc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz,void
 	cl::Buffer* buf_p= new cl::Buffer(
 	            *(ocl->context_p),
 	            CL_MEM_READ_ONLY | CL_MEM_READ_MODE,
-	            *sz,ptr,&err);
+	            (::size_t)*sz,ptr,&err);
 	checkErr(err, "makeReadBuffer()");
 //	void* buf_vp=reinterpret_cast<void*>(buf_p);
 //	int64_t* buf_ip=(int64_t*)buf_vp;
@@ -313,7 +313,7 @@ void oclmakereadwritebufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz) {
 	cl::Buffer* buf_p= new cl::Buffer(
 	            *(ocl->context_p),
 	            CL_MEM_READ_WRITE ,
-	            *sz,NULL,&err);
+	            (::size_t)*sz,NULL,&err);
 	checkErr(err, "makeReadWriteBuffer()");
 //	void* buf_vp=reinterpret_cast<void*>(buf_p);
 //	int64_t* buf_ip=(int64_t*)buf_vp;
@@ -327,7 +327,7 @@ void oclmakereadwritebufferptrc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz
 	cl::Buffer* buf_p= new cl::Buffer(
 	            *(ocl->context_p),
 	            CL_MEM_READ_WRITE | CL_MEM_READ_MODE,
-	            *sz,ptr,&err);
+	            (::size_t)*sz,ptr,&err);
 	checkErr(err, "makeReadWriteBuffer()");
 //	void* buf_vp=reinterpret_cast<void*>(buf_p);
 //	int64_t* buf_ip=(int64_t*)buf_vp;
@@ -341,7 +341,7 @@ void oclmakewritebufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz) {
 	cl::Buffer* buf_p= new cl::Buffer(
 	            *(ocl->context_p),
 	            CL_MEM_WRITE_ONLY,
-	            *sz,NULL,&err);
+	            (::size_t)*sz,NULL,&err);
 	checkErr(err, "makeReadBuffer()");
 //	void* buf_vp=reinterpret_cast<void*>(buf_p);
 //	int64_t* buf_ip=(int64_t*)buf_vp;
