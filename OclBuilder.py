@@ -33,7 +33,7 @@ def initOcl(*envt):
     else:
         env=envt[0]
 
-    global opts,dev,plat,kernel,kopts,useF,useDyn, OPENCL_DIR, useOclWrapper
+    global opts,dev,plat,kernel,kopts,kernel_opts,useF,useDyn, OPENCL_DIR, useOclWrapper
 
     help = """
     Options:
@@ -230,7 +230,8 @@ def initOcl(*envt):
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
     env.Append(CXXFLAGS = ['-std=c++0x','-Wall',dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
-    env.Append(CFLAGS = ['-Wall',dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
+    env.Append(CFLAGS = ['-Wall',dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)    
+    env['MACROS'] = DEVFLAGS
     env.Help(help)
 #if useOclWrapper:
 #env.Append(CPPPATH=[OPENCL_DIR,OPENCL_DIR+'/OpenCLIntegration'])    
@@ -265,6 +266,8 @@ def initOcl(*envt):
             env['F95']=os.environ['FC']
         if ('GFORTRAN' in os.environ and env['FORTRAN'] == os.environ['GFORTRAN']) :
             env['FORTRANFLAGS']=env['CFLAGS']
+            if OSX==1:
+                env['LINKFLAGS']=['-Wl,-stack_size,0x40000000'] # Give OS X 1G stack
             env.Append(FORTRANFLAGS=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian'])
             env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
             env.Append(F95FLAGS=env['CFLAGS'])

@@ -200,7 +200,7 @@ void runoclc_(OclWrapperF ocl_ivp,int* global , int* local) {
     } else {
     	ocl->enqueueNDRangeRun(*global);
     }
-	//std::cout <<"ocl->enqueueNDRangeRun\n";
+	//std::cout <<"ocl->enqueueNDRangeRun done!\n";
     /*
 	cl::NDRange* globalrange=new cl::NDRange(*global);
 	cl::NDRange* localrange;
