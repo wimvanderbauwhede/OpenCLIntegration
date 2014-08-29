@@ -14,7 +14,7 @@
 
 #endif
 enum InfoType {UINT, ULONG, STRING,SIZE_T_ARR, UINT_ARR,ULONG_ARR,STRING_ARR, SIZE_T};
-
+typedef long unsigned int wv_size_t;
 class InfoTuple {
     public:
         int infocode;
@@ -28,7 +28,7 @@ class DeviceInfo {
         std::map<std::string,InfoTuple> infotbl;
         std::map<std::string,unsigned int> uint_props;
         std::map<std::string,unsigned int*> uint_arr_props;
-        std::map<std::string,size_t*> size_t_arr_props;
+        std::map<std::string,long unsigned int*> size_t_arr_props;
         std::map<std::string,unsigned long> ulong_props;
         std::map<std::string,std::string> string_props;
     public:
@@ -86,7 +86,7 @@ class DeviceInfo {
         //infotbl["CL_DEVICE_PLATFORM"]=InfoTuple(CL_DEVICE_PLATFORM,UINT);
     };
     unsigned int max_compute_units(const cl::Device&);
-    size_t max_work_group_size(const cl::Device&);
+    long unsigned int max_work_group_size(const cl::Device&);
     //size_t* max_work_item_sizes(const cl::Device&);
     unsigned long int local_mem_size(const cl::Device&);
     unsigned long global_mem_max_alloc_size(const cl::Device&);

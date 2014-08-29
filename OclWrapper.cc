@@ -711,7 +711,7 @@ cl::Buffer& OclWrapper::makeWriteBuffer(int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            CL_MEM_WRITE_ONLY,
-	            bufSize,NULL,&err);
+	            (::size_t)bufSize,nullptr,&err);
 	 checkErr(err, "Buffer::Buffer()");
 	cl::Buffer& buf_r = *buf_p;
 	return buf_r;
@@ -721,7 +721,7 @@ void OclWrapper::makeWriteBufferPos(int argpos, int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            CL_MEM_WRITE_ONLY,
-	            bufSize,NULL,&err);
+	            (::size_t)bufSize,nullptr,&err);
 	 checkErr(err, "Buffer::Buffer()");
     buf[argpos]=buf_p;
     cl::Buffer& buf_r=*buf_p;
@@ -735,7 +735,7 @@ cl::Buffer& OclWrapper::makeReadBuffer(int bufSize,void* hostBuf, cl_mem_flags f
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            flags,
-	            bufSize,hostBuf,&err);
+	            (::size_t)bufSize,hostBuf,&err);
 	 checkErr(err, "makeReadBuffer()");
      cl::Buffer& buf_r=*buf_p;
 	return buf_r;
@@ -748,7 +748,7 @@ cl::Buffer& OclWrapper::makeReadWriteBuffer(int bufSize,void* hostBuf, cl_mem_fl
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            flags,
-	            bufSize,hostBuf,&err);
+	            (::size_t)bufSize,hostBuf,&err);
 	 checkErr(err, "makeReadBuffer()");
      cl::Buffer& buf_r=*buf_p;
 	return buf_r;
@@ -762,7 +762,7 @@ cl::Buffer& OclWrapper::makeReadBuffer(int bufSize,const void* hostBuf, cl_mem_f
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            flags,
-	            bufSize,t_hostBuf,&err);
+	            (::size_t)bufSize,t_hostBuf,&err);
 	 checkErr(err, "makeReadBuffer()");
      cl::Buffer& buf_r=*buf_p;
 	return buf_r;
@@ -776,7 +776,7 @@ cl::Buffer& OclWrapper::makeReadWriteBuffer(int bufSize,const void* hostBuf, cl_
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            flags,
-	            bufSize,t_hostBuf,&err);
+	            (::size_t)bufSize,t_hostBuf,&err);
 	 checkErr(err, "makeReadBuffer()");
      cl::Buffer& buf_r=*buf_p;
 	return buf_r;
@@ -796,7 +796,7 @@ void OclWrapper::makeReadBufferPos(int argpos, int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            CL_MEM_READ_ONLY,
-	            bufSize,NULL,&err);
+	            (::size_t)bufSize,NULL,&err);
 	 checkErr(err, "Buffer::Buffer()");
    buf[argpos]=buf_p;
    cl::Buffer& buf_r=*buf_p;
@@ -811,7 +811,7 @@ void OclWrapper::readBufferPos(int idx, int bufSize, void* hostBuf) {
 	            *buf[idx],
 	            CL_TRUE,
 	            0,
-	            bufSize,
+	            (::size_t)bufSize,
 	            hostBuf);
     checkErr(err, "CommandQueue::enqueueReadBuffer()");
 
@@ -823,21 +823,21 @@ void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, int bufSize, void* host
 	            deviceBuf,
 	            CL_TRUE,
 	            0,
-	            bufSize,
+	            (::size_t)bufSize,
 	            hostBuf);
     checkErr(err, "CommandQueue::enqueueReadBuffer()");
 
 }
 
 void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, bool blocking_read,
-		::size_t offset, ::size_t bufSize, void * hostBuf,
+		::wv_size_t offset, ::wv_size_t bufSize, void * hostBuf,
 		const VECTOR_CLASS<cl::Event> * events,
 		cl::Event * event) {
 	err = queue_p->enqueueReadBuffer(
 			deviceBuf,
 			blocking_read,
 			offset,
-			bufSize,
+			(::size_t)bufSize,
 			hostBuf,
 			events,
 			event);
@@ -853,21 +853,21 @@ void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, int bufSize, const void
 	            deviceBuf,
 	            CL_TRUE,
 	            0,
-	            bufSize,
+	            (::size_t)bufSize,
 	            (void*)hostBuf);
     checkErr(err, "CommandQueue::enqueueReadBuffer()");
 
 }
 
 void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, bool blocking_read,
-		::size_t offset, ::size_t bufSize, const void * hostBuf,
+		::wv_size_t offset, ::wv_size_t bufSize, const void * hostBuf,
 		const VECTOR_CLASS<cl::Event> * events,
 		cl::Event * event) {
 	err = queue_p->enqueueReadBuffer(
 			deviceBuf,
 			blocking_read,
 			offset,
-			bufSize,
+			(::size_t)bufSize,
 			(void*)hostBuf,
 			events,
 			event);
@@ -894,21 +894,21 @@ void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, int bufSize, void* hos
 	            deviceBuf,
 	            CL_TRUE,
 	            0,
-	            bufSize,
+	            (::size_t)bufSize,
 	            hostBuf);
 	checkErr(err, "CommandQueue::enqueueWriteBuffer()");
 
 }
 
 void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, bool blocking_write,
-		::size_t offset, ::size_t bufSize, void * hostBuf,
+		::wv_size_t offset, ::wv_size_t bufSize, void * hostBuf,
 		const VECTOR_CLASS<cl::Event> * events,
 		cl::Event * event) {
 	err = queue_p->enqueueWriteBuffer(
 			deviceBuf,
 			blocking_write,
 			offset,
-			bufSize,
+			(::size_t)bufSize,
 			hostBuf,
 			events,
 			event);
@@ -922,21 +922,21 @@ void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, int bufSize, const voi
 	            deviceBuf,
 	            CL_TRUE,
 	            0,
-	            bufSize,
+	            (::size_t)bufSize,
 	            (void*)hostBuf);
 	checkErr(err, "CommandQueue::enqueueWriteBuffer()");
 
 }
 
 void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, bool blocking_write,
-		::size_t offset, ::size_t bufSize, const void * hostBuf,
+		::wv_size_t offset, ::wv_size_t bufSize, const void * hostBuf,
 		const VECTOR_CLASS<cl::Event> * events,
 		cl::Event * event) {
 	err = queue_p->enqueueWriteBuffer(
 			deviceBuf,
 			blocking_write,
 			offset,
-			bufSize,
+			(::size_t)bufSize,
 			(void*)hostBuf,
 			events,
 			event);
@@ -1016,18 +1016,18 @@ int OclWrapper::getMaxComputeUnits() {
 	return deviceInfo.max_compute_units(devices[deviceIdx]);
 }
 
-size_t OclWrapper::getPreferredWorkGroupSizeMultiple() {
-    size_t nthreads_hint=0;
+wv_size_t OclWrapper::getPreferredWorkGroupSizeMultiple() {
+    wv_size_t nthreads_hint=0;
     kernel.getWorkGroupInfo(devices[deviceIdx],CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &nthreads_hint);
     return nthreads_hint;
 }
 
-size_t OclWrapper::getNThreadsHint() {
+wv_size_t OclWrapper::getNThreadsHint() {
     return getPreferredWorkGroupSizeMultiple();
 }
 
-size_t OclWrapper::getWorkGroupSize() {
-    size_t k_wg_sz = 0;
+wv_size_t OclWrapper::getWorkGroupSize() {
+    wv_size_t k_wg_sz = 0;
     kernel.getWorkGroupInfo(devices[deviceIdx],CL_KERNEL_WORK_GROUP_SIZE,&k_wg_sz);
     return k_wg_sz;
 }

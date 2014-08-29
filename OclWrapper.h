@@ -16,6 +16,9 @@
 #ifdef OSX
 // On OS X headers are in non-standard location
 #include <cl.hpp>
+#ifdef OCLV2
+#include <OclKernelFunctor.h>
+#endif
 #else
 // Not OS X, i.e. Linux
 #ifdef OCLV2
@@ -142,9 +145,9 @@ class OclWrapper {
 		int getGlobalMemCacheType();
 		unsigned long int getGlobalMemSize();
 		unsigned long int getLocalMemSize();
-        size_t getPreferredWorkGroupSizeMultiple();
-        size_t getNThreadsHint();
-        size_t getWorkGroupSize();
+        wv_size_t getPreferredWorkGroupSizeMultiple();
+        wv_size_t getNThreadsHint();
+        wv_size_t getWorkGroupSize();
 
 		cl::Buffer& makeWriteBuffer( int bufSize );
 //		cl::Buffer* makeStaticWriteBuffer( int idx,int bufSize );
@@ -170,16 +173,16 @@ class OclWrapper {
 		void readBuffer(
 				const cl::Buffer& buffer,
 				bool blocking_read,
-				::size_t offset,
-				::size_t size,
+				::wv_size_t offset,
+				::wv_size_t size,
 				void * ptr,
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
 		void readBuffer(
 				const cl::Buffer& buffer,
 				bool blocking_read,
-				::size_t offset,
-				::size_t size,
+				::wv_size_t offset,
+				::wv_size_t size,
 				const void * ptr,
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
@@ -190,8 +193,8 @@ class OclWrapper {
 		void writeBuffer(
 				const cl::Buffer& deviceBuf,
 				bool blocking_write,
-				::size_t offset,
-				::size_t size,
+				::wv_size_t offset,
+				::wv_size_t size,
 				void * ptr,
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
@@ -199,8 +202,8 @@ class OclWrapper {
 		void writeBuffer(
 				const cl::Buffer& deviceBuf,
 				bool blocking_write,
-				::size_t offset,
-				::size_t size,
+				::wv_size_t offset,
+				::wv_size_t size,
 				const void * ptr,
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
