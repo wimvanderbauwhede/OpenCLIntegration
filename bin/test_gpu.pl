@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 my $gpu='';
-if (-x '/usr/bin/lspci') {
+if (-x '/usr/bin/lspci' || -x '/sbin/lspci') {
     $gpu=`lspci -v | grep VGA`;
 } else { # assumme it's a Mac
     $gpu='NVIDIA';#`system_profiler -detailLevel mini | grep Chipset`;

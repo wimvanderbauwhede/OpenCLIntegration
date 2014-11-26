@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 my $acc='';
-if (-x '/sbin/lspci') {
+if (-x '/sbin/lspci' || -x '/usr/bin/lspci') {
     $acc=`lspci -v | grep Co-processor`;
 } else { # assumme it's a Mac
     $acc='NONE';#`system_profiler -detailLevel mini | grep Chipset`;
