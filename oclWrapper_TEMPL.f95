@@ -26,6 +26,23 @@
             call oclinitf(ocl, srcstr, srclen, kstr, klen)
         end subroutine
 
+        subroutine oclInitDev(srcstrp,kstrp,devIdx)   
+            integer, intent(In) :: devIdx
+            integer :: srclen, klen
+            character(len=*) :: srcstrp, kstrp
+            character(len=:), allocatable :: srcstr, kstr
+            srclen = len(srcstrp)
+            klen = len(kstrp)
+!            character(srclen) :: srcstr 
+!            character(klen) :: kstr 
+            allocate(character(len=srclen) :: srcstr)
+            allocate(character(len=klen) :: kstr)
+            srcstr=srcstrp
+            kstr=kstrp
+!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
+            call oclinitdevf(ocl, srcstr, srclen, kstr, klen, devIdx)
+        end subroutine
+
         subroutine oclInitOpts(srcstrp,kstrp,koptsstrp)   
             integer :: srclen, klen, koptslen
             character(len=*) :: srcstrp, kstrp, koptsstrp

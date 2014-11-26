@@ -7,6 +7,8 @@ if (-x '/sbin/lspci') {
 }
 if ($acc=~/Intel/i ) {
 print 'Intel';
+if ($acc=~/Altera/i ) {
+print 'Altera';
 } elsif (
 $acc=~/AMD/i ) { # bogus, but I don't know what would be OK
 print 'AMD';

@@ -56,6 +56,18 @@ void oclinitf_(OclWrapperF ocl_ivp,const char* source, int* srclen, const char* 
 //	std::cout <<(*ocl_ivp)<<"\n";
 }
 
+
+void oclinitdevf_(OclWrapperF ocl_ivp,const char* source, int* srclen, const char* kernel, int* klen, int* devIdx) {
+	std::string kstr(kernel);
+	kstr = kstr.substr(0,*klen);
+	kernel=kstr.c_str();
+	std::string sstr(source);
+	sstr = sstr.substr(0,*srclen);
+	source=sstr.c_str();
+	OclWrapper* ocl = new OclWrapper(source,kernel,KERNEL_OPTS,*devIdx);
+	*ocl_ivp=toWord<OclWrapper*>(ocl);
+}
+
 void oclinitoptsf_(OclWrapperF ocl_ivp,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen) {
 	std::string kstr(kernel);
 	kstr = kstr.substr(0,*klen);

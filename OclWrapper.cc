@@ -47,8 +47,8 @@ nPlatforms(0), ncalls(0) {
 //std::cout << "Default constructor DONE\n";
         
     }
-
-OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts) :
+// This is the Ctor used for Fortran oclInit()
+OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts,int devIdx=-1) :
 #ifdef DEV_GPU
 useCPU(false),
 useGPU(true),
@@ -85,7 +85,11 @@ nPlatforms(0), ncalls(0) {
 		selectDevice();
 #endif       
 #else
+        if (devIdx == -1) {
 		selectDevice();
+        } else {
+		selectDevice(devIdx);
+        }
 #endif        
 //        std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
         
