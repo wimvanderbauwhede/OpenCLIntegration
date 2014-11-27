@@ -224,8 +224,10 @@ def initOcl(*envt):
         defflags=map (lambda s: '-D'+s, deflist)   
 
     DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag]+defflags
+    if plat=='Altera':
+        DEVFLAGS+=['-DFPGA']
     if dev=='CPU':
-        dbg_dev=dbgmacro+' '
+        dbg_dev=dbgmacro+' '        
     else:	
 	    dbg_dev=''
     kernel_opts='\\"'+kopts+' -DEXT_DEFS '+dbg_dev+(' '.join(env['KERNEL_OPTS']))+'\\"'
