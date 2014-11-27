@@ -1,8 +1,9 @@
 #include "DeviceInfo.h"
 
-
 void DeviceInfo::show(const cl::Device& device) {
 	cl_int err=CL_SUCCESS;
+#ifdef DEVINFO
+    
     std::cout << "\nDevice Info:"<< std::endl;
 
     for (std::map<std::string,InfoTuple>::reverse_iterator iter_=infotbl.rbegin(); iter_!=infotbl.rend();iter_++) {
@@ -42,7 +43,7 @@ void DeviceInfo::show(const cl::Device& device) {
         }
     }
     std::cout << std::endl;
-  
+#endif  
 }
 
 unsigned int DeviceInfo::max_compute_units(const cl::Device& device) {
@@ -97,7 +98,9 @@ bool DeviceInfo::isACC(const cl::Device& device) {
 	cl_device_type devtype;
 	cl_int err=device.getInfo(CL_DEVICE_TYPE,&devtype);
 	 if (err != CL_SUCCESS && err!=CL_TRUE) {
+#ifndef FPGA         
 	            std::cerr << "ERROR: Device type check failed "<<err<<std::endl;
+#endif                
 	 }
 	return (devtype==CL_DEVICE_TYPE_ACCELERATOR);
 }
@@ -106,7 +109,9 @@ bool DeviceInfo::isGPU(const cl::Device& device) {
 	cl_device_type devtype;
 	cl_int err=device.getInfo(CL_DEVICE_TYPE,&devtype);
 	 if (err != CL_SUCCESS && err!=CL_TRUE) {
+#ifndef FPGA         
 	            std::cerr << "ERROR: Device type check failed "<<err<<std::endl;
+#endif                
 	 }
 	return (devtype==CL_DEVICE_TYPE_GPU);
 }
@@ -115,7 +120,9 @@ bool DeviceInfo::isCPU(const cl::Device& device) {
 	cl_device_type devtype;
 	cl_int err=device.getInfo(CL_DEVICE_TYPE,&devtype);
 	 if (err != CL_SUCCESS && err!=CL_TRUE) {
+#ifndef FPGA         
 	            std::cerr << "ERROR: Device type check failed "<<err<<std::endl;
+#endif                
 	 }
 	return (devtype==CL_DEVICE_TYPE_CPU);
 }
