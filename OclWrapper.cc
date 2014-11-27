@@ -48,7 +48,7 @@ nPlatforms(0), ncalls(0) {
         
     }
 // This is the Ctor used for Fortran oclInit()
-OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts,int devIdx=-1) :
+OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts,int devIdx) :
 #ifdef DEV_GPU
 useCPU(false),
 useGPU(true),
@@ -93,11 +93,21 @@ nPlatforms(0), ncalls(0) {
 #endif        
 //        std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
         
+//		loadKernel( ksource,  kname, kopts);
+	if (strcmp(kopts,"")==0) {
+		 std::string stlstr=kernelOpts.str();
+		 kernel_opts = stlstr.c_str();
+		 std::cout << "initOclWrapper: KERNEL_OPTS: "<<kernel_opts << "\n";
+		 loadKernel( ksource,  kname, kernel_opts);
+			std::cout << "initOclWrapper: loaded kernel\n";
+	} else {
 		loadKernel( ksource,  kname, kopts);
+	}
+        
 		createQueue();
         initArgStatus();
 }
-
+/*
 void OclWrapper::initOclWrapper(const char* ksource, const char* kname, const char* kopts)  {
 #ifdef DEV_GPU
 useCPU=false;
@@ -137,7 +147,6 @@ useACC=false;
 		 std::string stlstr=kernelOpts.str();
 		 kernel_opts = stlstr.c_str();
 		 std::cout << "initOclWrapper: KERNEL_OPTS: "<<kernel_opts << "\n";
-//std::cout << "initOclWrapper: "<<ksource<<";"<<kname<<"\n";
 		 loadKernel( ksource,  kname, kernel_opts);
 			std::cout << "initOclWrapper: loaded kernel\n";
 	} else {
@@ -148,7 +157,7 @@ useACC=false;
     initArgStatus();
 //			std::cout << "initOclWrapper: initialised ArgStatus\n";
 }
-
+*/
 OclWrapper::OclWrapper (int devIdx) :
 #ifdef DEV_GPU
 useCPU(false),

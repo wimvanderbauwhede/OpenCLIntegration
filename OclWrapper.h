@@ -117,7 +117,8 @@ class OclWrapper {
 		OclWrapper ();
 		OclWrapper (int deviceIdx);
 //		OclWrapper ();
-		OclWrapper (const char* ksource, const char* kname, const char* kopts="");
+//		OclWrapper (const char* ksource, const char* kname, const char* kopts="");
+        OclWrapper (const char* ksource, const char* kname, const char* kopts="",int devIdx=-1);
 		void initOclWrapper(const char* ksource, const char* kname, const char* kopts="");
 
 		bool hasCPU(int pIdx);
