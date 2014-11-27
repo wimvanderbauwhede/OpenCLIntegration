@@ -26,9 +26,13 @@
 // OpenCL v1.2
 #include <OclKernelFunctor.h>
 #else
+#ifndef FPGA
 #include <cl.hpp>
+#else
+#include <CL/cl.hpp>
 // For Altera?
 #include <OclKernelFunctor.h>
+#endif // FPGA
 #endif
 #endif
 
