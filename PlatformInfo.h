@@ -12,7 +12,13 @@
 #include <CL/cl.hpp>
 #else
 #define __NO_STD_VECTOR
+#ifndef FPGA
 #include <cl.hpp>
+#else
+#include <CL/cl.hpp>
+// For Altera?
+#include <OclKernelFunctor.h>
+#endif // FPGA
 #endif
 #endif
 
