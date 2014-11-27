@@ -4752,7 +4752,8 @@ public:
         const Context& context,
         const VECTOR_CLASS<Device>& devices,
         const Binaries& binaries,
-        VECTOR_CLASS<cl_int>* binaryStatus = NULL,
+        //VECTOR_CLASS<cl_int>* binaryStatus = NULL, WV: cl::vector has no resize!
+        std::vector<cl_int>* binaryStatus = NULL,
         cl_int* err = NULL)
     {
         cl_int error;
