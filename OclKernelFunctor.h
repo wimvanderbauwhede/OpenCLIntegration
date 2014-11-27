@@ -21,6 +21,9 @@ using namespace cl;
  * is straightforward to add more and a more general solution, similar to
  * Boost.Lambda could be followed if required in the future.
  */
+#ifndef OCLV2
+namespace cl {
+#endif    
 class OclKernelFunctor
 {
 private:
@@ -833,7 +836,9 @@ Event OclKernelFunctor::operator()(
 
     return event;
 }
-
+#ifndef OCLV2
+}
+#endif  
 #endif // __OCL_KERNEL_FUNCTOR_H__
 
 
