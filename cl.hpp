@@ -203,9 +203,9 @@
 #include <utility>
 #include <limits>
 
-#if !defined(__NO_STD_VECTOR)
+//#if !defined(__NO_STD_VECTOR)
 #include <vector>
-#endif
+//#endif
 
 #if !defined(__NO_STD_STRING)
 #include <string>
