@@ -243,7 +243,7 @@ def initOcl(*envt):
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
     if plat!='Altera':
-        env.Append(CXXFLAGS = ['-std=c++0x',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+        env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     else:    
         env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
