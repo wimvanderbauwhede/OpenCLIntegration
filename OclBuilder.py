@@ -39,8 +39,8 @@ def initOcl(*envt):
     Options:
      lib=0|1 [1] build an OclWrapper library
     *dyn=0|1 [0] build a dynamic Library             OclBuilder.useDyn
-    *plat=AMD|NVIDIA|Intel|Altera|FPGA|MIC [NVIDIA]
-    *dev=CPU|GPU|ACC [GPU] device
+    *plat=AMD|NVIDIA|Intel|Altera|MIC [NVIDIA]
+    *dev=CPU|GPU|ACC|FPGA [GPU] device
      gpu=-1|0|1 [-1, means automatic selection]
      acc=-1|0|1 [-1, means automatic selection]
      O=[gcc -O flag] [3]
@@ -109,7 +109,7 @@ def initOcl(*envt):
     elif plat=='MIC':      
         INTEL_SDK_PATH=os.environ['INTELOCLSDKROOT']
         dev='ACC'
-    elif plat=='Altera' or plat=='FPGA':      
+    elif plat=='Altera':      
         ALTERA_SDK_PATH=os.environ['ALTERAOCLSDKROOT']
         dev='ACC'
     else:   
@@ -126,9 +126,9 @@ def initOcl(*envt):
                     plat='MIC'
                     dev='ACC'
                 elif os.environ['OPENCL_ACC']=='Altera':
-                    INTEL_SDK_PATH=os.environ['ALTERAOCLSDKROOT']
-                    plat='FPGA'
-                    dev='ACC'
+                    ALTERA_SDK_PATH=os.environ['ALTERAOCLSDKROOT']
+                    plat='Altera'
+                    dev='FPGA'
                 elif os.environ['OPENCL_CPU']=='Intel':
                     INTEL_SDK_PATH=os.environ['INTELOCLSDKROOT']
                     plat='Intel'
@@ -258,7 +258,8 @@ def initOcl(*envt):
 #            env.Append(LIBPATH=['.'])
 #            env.Append(LIBS=['OclWrapper'])
     else:    
-        env.Append(LIBS=['OpenCL'])
+        if plat !='Altera':
+            env.Append(LIBS=['OpenCL'])
         if plat=='AMD':
             env.Append(CPPPATH=[AMD_SDK_PATH+'/include/', AMD_SDK_PATH+'/include/CL','/usr/include/CL'])
             env.Append(LIBPATH=[AMD_SDK_PATH+'/lib/x86_64'])
@@ -268,9 +269,11 @@ def initOcl(*envt):
         elif plat=='MIC':
             env.Append(CPPPATH=[INTEL_SDK_PATH+'/include/'])
             env.Append(LIBPATH=[INTEL_SDK_PATH+'/lib64'])
-        elif plat=='FPGA' or plat=='Altera':
-            env.Append(CPPPATH=[ALTERA_SDK_PATH+'/host/include/'])
-            env.Append(LIBPATH=[ALTERA_SDK_PATH+'/host/linux64/lib',os.environ['AOCL_BOARD_PACKAGE_ROOT']+'/linux64/lib'])
+        elif plat=='Altera':
+            env.Append(CPPPATH=map(lambda s: ALTERA_SDK_PATH+s, ['/host/include/','/common/inc','/board/nalla_pcie/include' ]))
+            env.Append(LIBPATH=[ALTERA_SDK_PATH+'/host/linux64/lib',ALTERA_SDK_PATH+'/board/nalla_pcie/linux64/lib',os.environ['AOCL_BOARD_PACKAGE_ROOT']+'/linux64/lib'])
+            env.Append(LIBS=['alteracl', 'dl', 'acl_emulator_kernel_rt', 'alterahalmmd', 'nalla_pcie_mmd', 'elf', 'rt', 'stdc++'])
+            env.Append(CXXFLAGS = ['-fPIC'])
         else: # means NVIDIA
             env.Append(CPPPATH=[NVIDIA_SDK_PATH+'/OpenCL/common/inc' ,NVIDIA_SDK_PATH+'/OpenCL/common/inc/CL'])
 
