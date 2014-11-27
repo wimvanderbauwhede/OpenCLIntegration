@@ -11,6 +11,7 @@
 #include <vector>
 #include <CL/cl.hpp>
 #else
+#define __NO_STD_VECTOR
 #include <cl.hpp>
 #endif
 #endif
