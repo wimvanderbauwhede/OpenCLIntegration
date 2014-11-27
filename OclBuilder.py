@@ -100,6 +100,7 @@ def initOcl(*envt):
 
     dev=getOpt('dev','Device','GPU')
     plat=getOpt('plat','Platform','NVIDIA')
+    print "PLAT:"+plat
     if OSX==1:
         plat='Apple'
     if plat=='AMD':      
@@ -116,7 +117,7 @@ def initOcl(*envt):
         if plat != 'Apple':    
             NVIDIA_SDK_PATH=os.environ['NVSDKCUDA_ROOT']
             if os.environ['OPENCL_GPU']!='NVIDIA':
-                print 'No NVIDIA platform, defaulting to AMD CPU'
+#                print 'No NVIDIA platform, defaulting to AMD CPU'
                 if os.environ['OPENCL_CPU']=='AMD':
                     AMD_SDK_PATH=os.environ['AMDAPPSDKROOT']
                     plat='AMD'
