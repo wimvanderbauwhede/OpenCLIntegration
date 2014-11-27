@@ -242,7 +242,10 @@ def initOcl(*envt):
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
-    env.Append(CXXFLAGS = ['-std=c++0x',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+    if plat!='Altera':
+        env.Append(CXXFLAGS = ['-std=c++0x',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+        else:    
+        env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
     env['MACROS'] = DEVFLAGS
 
@@ -271,7 +274,7 @@ def initOcl(*envt):
             env.Append(LIBPATH=[INTEL_SDK_PATH+'/lib64'])
         elif plat=='Altera':
             env.Append(CPPPATH=map(lambda s: ALTERA_SDK_PATH+s, ['/host/include/','/common/inc','/board/nalla_pcie/include' ]))
-            env.Append(LIBPATH=['/usr/lib64',ALTERA_SDK_PATH+'/host/linux64/lib',ALTERA_SDK_PATH+'/board/nalla_pcie/linux64/lib',os.environ['AOCL_BOARD_PACKAGE_ROOT']+'/linux64/lib'])
+            env.Append(LIBPATH=[ALTERA_SDK_PATH+'/host/linux64/lib',ALTERA_SDK_PATH+'/board/nalla_pcie/linux64/lib',os.environ['AOCL_BOARD_PACKAGE_ROOT']+'/linux64/lib'])
             env.Append(LIBS=['alteracl', 'dl', 'acl_emulator_kernel_rt', 'alterahalmmd', 'nalla_pcie_mmd', 'elf', 'rt', 'stdc++'])
             env.Append(CXXFLAGS = ['-fPIC'])
         else: # means NVIDIA
