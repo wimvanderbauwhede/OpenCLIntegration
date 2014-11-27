@@ -27,6 +27,8 @@
 #include <OclKernelFunctor.h>
 #else
 #include <cl.hpp>
+// For Altera?
+#include <OclKernelFunctor.h>
 #endif
 #endif
 
