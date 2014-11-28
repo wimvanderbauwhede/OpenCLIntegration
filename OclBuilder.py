@@ -245,7 +245,7 @@ def initOcl(*envt):
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
-    if plat!='Altera':
+    if True or plat!='Altera':
         env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     else:    
         env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
