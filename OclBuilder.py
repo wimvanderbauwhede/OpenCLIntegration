@@ -237,7 +237,8 @@ def initOcl(*envt):
     if useOclWrapper:    
         oclsources=map (lambda s: OPENCL_DIR+'/OpenCLIntegration/'+s, ['Timing.cc','DeviceInfo.cc','PlatformInfo.cc','OclWrapper.cc'])
         env['OCLSOURCES']=oclsources
-
+    if plat=='Altera':
+        oclsources+=[OPENCL_DIR+'/OpenCLIntegration/libstdcxx-compatibility.cpp']
     if OSX==1 and 'ROOTSYS' in os.environ:
         print 'Setting CXX to g++-4.2 for CERN ROOT on OS X'
         env['CXX'] = ['g++-4.2'] # FIXME: because any higher g++ results in ERROR: malloc: *** error for object 0x7fff7064c500: pointer being freed was not allocated
