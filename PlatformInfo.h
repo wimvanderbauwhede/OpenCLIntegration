@@ -15,8 +15,8 @@
 #ifndef FPGA
 #include <cl.hpp>
 #else
+// For Altera
 #include <CL/cl.hpp>
-// For Altera?
 #include <OclKernelFunctor.h>
 #endif // FPGA
 #endif

@@ -1096,6 +1096,7 @@ inline cl_int getInfoHelper(Func f, cl_uint name, VECTOR_CLASS<T>* param, long)
 {
     ::size_t required;
     cl_int err = f(name, 0, NULL, &required);
+    //printf("cl.hpp line 1099: required: %d\n",required);
     if (err != CL_SUCCESS) {
         return err;
     }
@@ -1105,7 +1106,7 @@ inline cl_int getInfoHelper(Func f, cl_uint name, VECTOR_CLASS<T>* param, long)
     if (err != CL_SUCCESS) {
         return err;
     }
-
+  
     param->assign(&value[0], &value[required/sizeof(T)]);
     return CL_SUCCESS;
 }
@@ -1151,6 +1152,7 @@ template <typename Func>
 inline cl_int getInfoHelper(Func f, cl_uint name, VECTOR_CLASS<char *>* param, int)
 {
     cl_int err = f(name, param->size() * sizeof(char *), &(*param)[0], NULL);
+  //printf("cl.hpp line 1156: %d,%d,%d\n",name,param->size(),sizeof(char *));
 
     if (err != CL_SUCCESS) {
         return err;
@@ -5053,6 +5055,7 @@ inline Program linkProgram(
 template<>
 inline VECTOR_CLASS<char *> cl::Program::getInfo<CL_PROGRAM_BINARIES>(cl_int* err) const
 {
+    //printf("cl.hpp 5058: HERE!\n");
     VECTOR_CLASS< ::size_t> sizes = getInfo<CL_PROGRAM_BINARY_SIZES>();
     VECTOR_CLASS<char *> binaries;
     for (VECTOR_CLASS< ::size_t>::iterator s = sizes.begin(); s != sizes.end(); ++s) 

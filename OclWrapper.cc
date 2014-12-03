@@ -94,16 +94,33 @@ nPlatforms(0), ncalls(0) {
 //        std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
         
 //		loadKernel( ksource,  kname, kopts);
+#ifndef FPGA        
 	if (strcmp(kopts,"")==0) {
 		 std::string stlstr=kernelOpts.str();
 		 kernel_opts = stlstr.c_str();
 		 std::cout << "initOclWrapper: KERNEL_OPTS: "<<kernel_opts << "\n";
 		 loadKernel( ksource,  kname, kernel_opts);
 			std::cout << "initOclWrapper: loaded kernel\n";
-	} else {
+	} else {       
 		loadKernel( ksource,  kname, kopts);
 	}
-        
+#else
+    // For the FPGA we need to see if there is an aocx file and load it
+    std::string cl_file(ksource);
+    std::string file_name = cl_file.substr(0,cl_file.size()-2);
+    std::string aocx_file = file_name+".aocx";
+#ifdef VERBOSE
+    std::cout <<"Looking for "<<aocx_file <<" for " << ksource<<"\n";
+#endif    
+    char* aocx_file_str = aocx_file.c_str();
+    if(access( aocx_file_str, F_OK ) != -1 ) {
+    loadBinary(aocx_file_str);
+    loadKernel(kstr);
+    } else {
+        std::cerr << "Could not find "<<aocx_file<<"\n";
+        exit(0);
+    }
+#endif    
 		createQueue();
         initArgStatus();
 }
@@ -456,37 +473,76 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
 //    checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::build()");
 //}
 
-
+// ---------------------------------------------------------------------
+// This loads a binary, turns it into a cl::Program and builds it
 void OclWrapper::loadBinary(const char* ksource) {
-    std::ifstream file(ksource);
-    checkErr(file.is_open() ? CL_SUCCESS:-1, ksource);
+ //    std::cout <<"\n\nEntered loadBinary("<< ksource <<")\n";
+
+    std::ifstream binfile(ksource);
+    checkErr(binfile.is_open() ? CL_SUCCESS:-1, ksource);
 
     std::string prog(
-            std::istreambuf_iterator<char>(file),
+            std::istreambuf_iterator<char>(binfile),
             (std::istreambuf_iterator<char>())
             );
 
-    cl::Program::Binaries binaries(1, std::make_pair(prog.c_str(), prog.length()+1));
+    cl::Program::Binaries binaries(1, std::make_pair((void*)prog.c_str(), prog.length())); // WV: the original code had prog.length()+1
+// std::cout <<"Binary size: "<< prog.length()<<"\n";
 #ifdef OCLV2
     std::vector<cl_int> binaryStatus;
 #else
     cl::vector<cl_int> binaryStatus;
 #endif    
     program_p = new cl::Program(*context_p, devices, binaries, &binaryStatus, &err);
-    checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::Program() from Binary");
-}
+    checkErr(err, "Program::Program() from Binary");
 
-void OclWrapper::storeBinary(const char* ksource) {
+     err = program_p->build(devices);
+    std::string err_str("Program::build(");
+    err_str+=ksource;
+    err_str+=")";
+    const char* err_cstr =  err_str.c_str();
+    checkErr(err, err_cstr );
+
+//    std::cout <<"Left loadBinary("<< ksource <<") with status "<< ((binaryStatus[0] == CL_SUCCESS) ? "SUCCESS" : "CL_INVALID_BINARY") <<"\n";
+
+}
+// ---------------------------------------------------------------------
+void OclWrapper::storeBinary(const char* kbinname) {
+    int nDevs=devices.size();
+//    std::cout <<"Entered storeBinary("<< kbinname <<")\n";
+
+
+#ifdef OCLV2
+	std::vector<::size_t> binarySizes;
+#else
+	cl::vector<::size_t> binarySizes;
+#endif
+
+    err = program_p->getInfo(CL_PROGRAM_BINARY_SIZES, &binarySizes);
+    checkErr(err, "Program::getInfo(CL_PROGRAM_BINARY_SIZES)");
+ //  std::cout << " binarySizes.size(): " << binarySizes.size() << "\n";
+ //  std::cout << "Kernel binary size for device "<< deviceIdx << ": "<< binarySizes[deviceIdx] << "\n";
+    
 #ifdef OCLV2
 	std::vector<char*> binaries;
 #else
 	cl::vector<char*> binaries;
 #endif
-	err = program_p->getInfo(CL_PROGRAM_BINARIES,&binaries);
+    //WV: This does not work
+	//err = program_p->getInfo(CL_PROGRAM_BINARIES,&binaries);
+    // WV: Digging into cl.hpp (version 1.2.6), I found this:
+	binaries = program_p->getInfo<CL_PROGRAM_BINARIES>(&err);
 	checkErr(err, "Program::getInfo(CL_PROGRAM_BINARIES)");
-	// Now write this binary to a file
-	std::ofstream file(ksource);
-// ...
+   // std::cout << "HERE2\n";
+
+ //  std::cout << "\nbinaries.size(): " << binaries.size() << "\n";
+//   exit(0);
+  
+// Store the binary for the device 
+            std::ofstream binfile(kbinname,std::ofstream::binary);
+            binfile.write(binaries[deviceIdx], binarySizes[deviceIdx]);
+            binfile.close();
+            
 }
 
 void OclWrapper::reloadKernel(const char* kname) {
@@ -503,6 +559,12 @@ void OclWrapper::loadKernel(const char* kname) {
 void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     //std::cout << "buildProgram\n";
 	buildProgram(ksource,"");
+#if OCLDBG==1
+    std::string buildLog;
+    program_p->getBuildInfo(devices[deviceIdx],CL_PROGRAM_BUILD_LOG,&buildLog); 
+    std::cout << buildLog;
+#endif
+
     //std::cout << "new Kernel\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
