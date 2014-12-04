@@ -4,7 +4,7 @@
  * */
 
 #include "OclWrapper.h"
-
+#include <unistd.h>
 // ----------------------------------------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------------------------------------
@@ -112,10 +112,10 @@ nPlatforms(0), ncalls(0) {
 #ifdef VERBOSE
     std::cout <<"Looking for "<<aocx_file <<" for " << ksource<<"\n";
 #endif    
-    char* aocx_file_str = aocx_file.c_str();
+    const char* aocx_file_str = aocx_file.c_str();
     if(access( aocx_file_str, F_OK ) != -1 ) {
     loadBinary(aocx_file_str);
-    loadKernel(kstr);
+    loadKernel(kname);
     } else {
         std::cerr << "Could not find "<<aocx_file<<"\n";
         exit(0);
@@ -508,7 +508,7 @@ void OclWrapper::loadBinary(const char* ksource) {
 }
 // ---------------------------------------------------------------------
 void OclWrapper::storeBinary(const char* kbinname) {
-    int nDevs=devices.size();
+    //int nDevs=devices.size();
 //    std::cout <<"Entered storeBinary("<< kbinname <<")\n";
 
 
