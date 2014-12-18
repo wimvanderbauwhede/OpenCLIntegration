@@ -1,8 +1,8 @@
 #include "DeviceInfo.h"
 
 void DeviceInfo::show(const cl::Device& device) {
-	cl_int err=CL_SUCCESS;
 #ifdef DEVINFO
+	cl_int err=CL_SUCCESS;
     
     std::cout << "\nDevice Info:"<< std::endl;
 

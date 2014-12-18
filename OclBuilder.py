@@ -33,12 +33,13 @@ def initOcl(*envt):
     else:
         env=envt[0]
 
-    global opts,dev,plat,kernel,kopts,kernel_opts,useF,useDyn, OPENCL_DIR, useOclWrapper
+    global opts,dev,plat,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper
 
     help = """
     Options:
      lib=0|1 [1] build an OclWrapper library
     *dyn=0|1 [0] build a dynamic Library             OclBuilder.useDyn
+    *mcm=s|m|l [s] mcmodel flag for gcc/gfortran
     *plat=AMD|NVIDIA|Intel|Altera|MIC [NVIDIA]
     *dev=CPU|GPU|ACC|FPGA [GPU] device
      gpu=-1|0|1 [-1, means automatic selection]
@@ -205,6 +206,8 @@ def initOcl(*envt):
     if 'useDyn' in env:
         if env['useDyn']==1:
             useDyn='1'
+            
+    mcModel=getOpt('mcm','GCC Code Model Flag','s')
             
     optim=getOpt('O','Optimisation','2')
     optflag='-O'+optim
