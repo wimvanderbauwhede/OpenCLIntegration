@@ -252,6 +252,7 @@ def initOcl(*envt):
         env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
     env['MACROS'] = DEVFLAGS
+    #env.Append(CXXFLAGS = ['-mcmodel=large']
 
     env.Help(help)
 #if useOclWrapper:
@@ -296,6 +297,7 @@ def initOcl(*envt):
             if OSX==1:
                 env['LINKFLAGS']=['-Wl,-stack_size,0x40000000'] # Give OS X 1G stack
             env.Append(FORTRANFLAGS=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian'])
+            #env.Append(FORTRANFLAGS=['-mcmodel=large'])
 #env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-mcmodel=medium','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
             env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
             env.Append(F95FLAGS=env['CFLAGS'])
