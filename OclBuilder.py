@@ -100,7 +100,7 @@ def initOcl(*envt):
 
     dev=getOpt('dev','Device','GPU')
     plat=getOpt('plat','Platform','NVIDIA')
-    print "PLAT:"+plat
+#    print "PLAT:"+plat
     if OSX==1:
         plat='Apple'
     if plat=='AMD':      
