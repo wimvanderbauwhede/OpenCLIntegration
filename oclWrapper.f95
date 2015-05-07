@@ -186,9 +186,10 @@
 !            integer :: nargs, argstypes, 
 !            call oclrunc(ocl,nargs,argtypes,args)
 !        end subroutine
-        subroutine runOcl(global,local)
+        subroutine runOcl(global,local, exectime)
             integer :: global, local
-            call runoclc(ocl,global,local)
+            real :: exectime
+            call runoclc(ocl,global,local, exectime)
         end subroutine
 
         subroutine oclReadBuffer(buffer,sz,array)

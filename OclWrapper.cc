@@ -670,7 +670,7 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     //delete event;
     return ncalls;
 }
-int OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localRange) {
+float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localRange) {
     //std::cout << "enqueueNDRangeRun( pointers )\n";
 	// Create the CommandQueue
     if ((void*)queue_p==NULL) {
@@ -739,13 +739,15 @@ int OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localRan
    // std::cout<<"call to event.wait()\n";
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
 #ifdef OPENCL_TIMINGS
-	double kernel_exec_time=getExecutionTime(event);
-	std::cout << "Kernel execution time: "<<kernel_exec_time<<"\n";
+	float kernel_exec_time=getExecutionTime(event);
+//	std::cout << "Kernel execution time: "<<kernel_exec_time<<"\n";
+#else
+	float kernel_exec_time=(float)ncalls;
 #endif
 	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
   //  std::cout << "done waiting\n";
     //delete event;
-    return ncalls;
+    return kernel_exec_time;
 }
 
 int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange& localRange) {

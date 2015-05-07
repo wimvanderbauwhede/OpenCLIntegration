@@ -177,7 +177,7 @@ class OclWrapper {
 		int enqueueNDRangeOffset(const cl::NDRange& = cl::NDRange(0),const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		int enqueueNDRange(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		int enqueueNDRangeRun(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
-		int enqueueNDRangeRun(unsigned int = 1, unsigned int = 0);
+		float enqueueNDRangeRun(unsigned int = 1, unsigned int = 0);
 		void readBuffer(const cl::Buffer& deviceBuf, int bufSize, void* hostBuf);
 		void readBuffer(const cl::Buffer& deviceBuf, int bufSize, const void* hostBuf);
 		void readBuffer(

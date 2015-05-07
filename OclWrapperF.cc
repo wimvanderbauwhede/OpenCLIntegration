@@ -203,14 +203,14 @@ void oclsetintconstargc_(OclWrapperF ocl_ivpa,int* pos,  int* constarg) {
 };
 // This works only for a 1-D range. For a 2-D or 3-D range, we can pass arrays
 // but how do we know their size? We can use a 4-elt array, the 1st elt is the size
-void runoclc_(OclWrapperF ocl_ivp,int* global , int* local) {
+void runoclc_(OclWrapperF ocl_ivp,int* global , int* local, float* ext_time) {
 	//std::cout <<"unwrap pointer "<<ocl_ivp<<"\n";
 	OclWrapper* ocl = fromWord<OclWrapper*>(*ocl_ivp);
 	//std::cout <<"create ranges "<<(*global)<<","<<(*local)<<"\n";
     if (*local!=0) {
-	    ocl->enqueueNDRangeRun(*global,*local);
+    	*ext_time = ocl->enqueueNDRangeRun(*global,*local);
     } else {
-    	ocl->enqueueNDRangeRun(*global);
+    	*ext_time = ocl->enqueueNDRangeRun(*global);
     }
 	//std::cout <<"ocl->enqueueNDRangeRun done!\n";
     /*
