@@ -39,7 +39,7 @@ void oclsetintconstargc_(OclWrapperF ocl,int* pos, int* constarg);
 // args is an array of uint64_t; the arguments can be buffers or constants, so I need a bitmask argtypes, another int64_t
 // this assumes we have no more than 64 arguments ...
 void oclrunc_(OclWrapperF ocl,int* nargs,int64_t argtypes, int64_t* args);
-void runoclc_(OclWrapperF ocl,int* global , int* local);
+void runoclc_(OclWrapperF ocl,int* global , int* local, float* exectime);
 
 // I want it a lot simpler:
 /*
