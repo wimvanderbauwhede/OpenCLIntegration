@@ -590,8 +590,11 @@ void OclWrapper::createQueue() {
    // std::cout << "Device Idx: "<<deviceIdx<<"\n";
 	
     // Create the CommandQueue
+#ifndef OPENCL_TIMINGS
 	queue_p = new cl::CommandQueue(*context_p, devices[deviceIdx], 0, &err);
-
+#else
+	queue_p = new cl::CommandQueue(*context_p, devices[deviceIdx], CL_QUEUE_PROFILING_ENABLE, &err);
+#endif
     checkErr(err, "CommandQueue::CommandQueue()");
 }
 void OclWrapper::setArg(unsigned int idx, const cl::Buffer& buf) {
@@ -663,6 +666,7 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
 	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
     //std::cout << "done waiting\n";
+
     //delete event;
     return ncalls;
 }
@@ -734,6 +738,10 @@ int OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localRan
     }
    // std::cout<<"call to event.wait()\n";
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+#ifdef OPENCL_TIMINGS
+	double kernel_exec_time=getExecutionTime(event);
+	std::cout << "Kernel execution time: "<<kernel_exec_time<<"\n";
+#endif
 	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
   //  std::cout << "done waiting\n";
     //delete event;
@@ -1121,8 +1129,18 @@ unsigned long int OclWrapper::getGlobalMemSize() {
 unsigned long int OclWrapper::getLocalMemSize() {
 	return deviceInfo.local_mem_size(devices[deviceIdx]);
 }
+#ifdef OPENCL_TIMINGS
+double OclWrapper::getExecutionTime(const cl::Event& event) {
+cl_ulong time_start, time_end;
+double total_time;
 
-
+event.getProfilingInfo( CL_PROFILING_COMMAND_START,  &time_start);
+event.getProfilingInfo( CL_PROFILING_COMMAND_END,  &time_end);
+total_time = time_end - time_start;
+//printf("\nExecution time in milliseconds = %0.3f ms\n", (total_time / 1000000.0) );
+return (total_time / 1000000.0) ;
+}
+#endif
 // ----------------------------------------------------------------------------------------
 // Functions, not part of the class
 // ----------------------------------------------------------------------------------------

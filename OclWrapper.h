@@ -51,6 +51,7 @@
 #include <DeviceInfo.h>
 #include <PlatformInfo.h>
 
+#define OPENCL_TIMINGS
 #define NBUFS 16
 void checkErr(cl_int err, const char * name);
 inline double wsecond();
@@ -88,8 +89,10 @@ class OclWrapper {
 		void getDevices();
 		// For the Fortran interface, but we could use this approach in C/C++ as well
 		void initArgStatus();
+#ifdef OPENCL_TIMINGS
+		double getExecutionTime (const cl::Event& event);
+#endif
 		
-
 	public:
 #ifdef OCLV2
 		std::vector<cl::Device> devices;
