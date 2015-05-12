@@ -89,9 +89,6 @@ class OclWrapper {
 		void getDevices();
 		// For the Fortran interface, but we could use this approach in C/C++ as well
 		void initArgStatus();
-#ifdef OPENCL_TIMINGS
-		double getExecutionTime (const cl::Event& event);
-#endif
 		
 	public:
 #ifdef OCLV2
@@ -218,6 +215,9 @@ class OclWrapper {
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
 		void writeBufferPos(int argpos, int bufSize, void* hostBuf);
+#ifdef OPENCL_TIMINGS
+		double getExecutionTime (const cl::Event& event);
+#endif
 
 };
 
