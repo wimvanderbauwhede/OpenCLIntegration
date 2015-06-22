@@ -33,7 +33,7 @@ def initOcl(*envt):
     else:
         env=envt[0]
 
-    global opts,dev,plat,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper
+    global opts,dev,plat,multi,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper
 
     help = """
     Options:
@@ -57,13 +57,14 @@ def initOcl(*envt):
      wx,wy,wz=<number> [128,128,64] x/y/z dimensions WX,WY,WZ
      nth=<number> [1] number of threads per core     NTH
      ngroups=<number> [0] number of workgroups		 NGROUPS
-     order=<number> [1] loop order			        LOOP_ORDER 
+     order=<number> [1] loop order			         LOOP_ORDER 
      ref=0|1|2 [1]     reference 2=ref only          REF
      v=0|1 [1]         verbose                       VERBOSE 
      warn=0|1 [1]      warnings                      WARNINGS
      mode=0|1|2   COPY|COPY+ALLOC|USE 
      dbg=0|1 [0]                                     OCLDBG
      nruns= [1]                                      NRUNS
+     multi=0|1 [0]   Support multiple devices in threads, for use with Fortran/GMCF     OCL_MULTIPLE_DEVICES
     *kopts=<string> kernel options, can only be a single alphanumeric string 
                     if you need complex options, put them in the Scons script
                     For example, to add a path for kernel includes:
@@ -157,6 +158,12 @@ def initOcl(*envt):
     nth=getOpt('nth','#threads','1')
     ngroups=getOpt('ngroups','#workgroups','0')
     loop_order=getOpt('order','loop order','1')
+
+    multi=getOpt('multi','Support multiple devices (Fortran)','0')    
+    multimacro='-DOCL_MULTIPLE_DEVICES=1'
+    if multi=='0':
+        multimacro=''
+
     if not 'kopts' in globals():
         kopts=getOpt('kopts','OpenCL kernel compilation options. Can only be a single alphanumeric string.','-cl-fast-relaxed-math')
     nruns=getOpt('nruns','Number of runs','1')
@@ -172,6 +179,7 @@ def initOcl(*envt):
     env.Append(KERNEL_OPTS=['-DWY='+wy])
     env.Append(KERNEL_OPTS=['-DWZ='+wz])
     env.Append(KERNEL_OPTS=['-DLOOP_ORDER='+loop_order])
+    env.Append(KERNEL_OPTS=[multimacro])
     ref=getOpt('ref','Reference','1')
     refflag='-DREF'
 
@@ -196,6 +204,8 @@ def initOcl(*envt):
     if dbg=='0':
         dbgmacro=''
         dbgflag=''
+
+
 
     useF=getOpt('F','Functional',0)
     if 'useF' in env:
@@ -226,7 +236,7 @@ def initOcl(*envt):
         deflist=defs.split(',')
         defflags=map (lambda s: '-D'+s, deflist)   
 
-    DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag]+defflags
+    DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
     if plat=='Altera':
         DEVFLAGS+=['-DFPGA']
     if dev=='CPU':

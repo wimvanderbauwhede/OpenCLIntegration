@@ -11,11 +11,11 @@
         integer :: oclNunits, oclNthreadsHint  ! Does not need to be package global, can be defined locally in the module doing the API calls
 ! So I haven't solved this satisfactorily
 ! A better way might be to use setters and getters for this, so that you would say "call oclStoreBuffer()" and "call oclLoadBuffer()"
-#ifndef OCL_MULTIPLE_DEVICES
+
         integer(8), dimension(32) :: oclBuffers ! Is used in user code and would need to be per-thread unique
-#else
-        integer(8), dimension(0:7,32) :: oclBuffers ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
-#endfi
+!#ifdef OCL_MULTIPLE_DEVICES
+        integer(8), dimension(0:7,32) :: oclBuffersPerInst ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
+!#endif
         integer, dimension(32,3) :: oclBufferShapes ! Not used
         integer :: oclGlobalRange, oclLocalRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         save
@@ -37,8 +37,10 @@
             kstr=kstrp
 !            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
             oclinstid = 0
+!            print *, "INIT OCL"
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclsetoclinstancec(oclinstmap, oclinstid)
+!            print *, "CALL SET INSTANCE"
+            call oclsetinstancec(oclinstmap, oclinstid)
 #endif
             call oclinitf(ocl(oclinstid), srcstr, srclen, kstr, klen)
         end subroutine
@@ -62,7 +64,7 @@
             oclinstid = 0
 #else
             oclinstid = devIdx
-           call oclsetoclinstancec(oclinstmap, oclinstid)
+           call oclsetinstancec(oclinstmap, oclinstid)
 #endif
 
             call oclinitdevf(ocl(oclinstid), srcstr, srclen, kstr, klen, devIdx)
@@ -87,7 +89,7 @@
 !            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
             oclinstid = 0
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclsetoclinstancec(oclinstmap, oclinstid)
+           call oclsetinstancec(oclinstmap, oclinstid)
 #endif
             call oclinitoptsf(ocl(oclinstid), srcstr, srclen, kstr, klen, koptsstr, koptslen)
         end subroutine        
@@ -114,7 +116,7 @@
             oclinstid = 0
 #else
             oclinstid = devIdx
-           call oclsetoclinstancec(oclinstmap, oclinstid)
+           call oclsetinstancec(oclinstmap, oclinstid)
 #endif
 
             call oclinitoptsdevf(ocl(oclinstid), srcstr, srclen, kstr, klen, koptsstr, koptslen, devIdx)
@@ -125,7 +127,7 @@
             integer(8) :: oclinstid
             oclinstid = 0
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -137,7 +139,7 @@
             integer :: nthreads
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -155,7 +157,7 @@
             real,dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -172,7 +174,7 @@
             real,dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -194,7 +196,7 @@
             integer,dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -216,7 +218,7 @@
             integer,dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -240,7 +242,7 @@
             integer :: sz
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -252,7 +254,7 @@
             integer :: sz
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -264,7 +266,7 @@
             integer :: sz
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -278,7 +280,7 @@
             real, dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -296,7 +298,7 @@
             real, dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -313,7 +315,7 @@
             integer(8):: buf
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -325,7 +327,7 @@
             integer(8):: buf
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -337,7 +339,7 @@
             integer(8):: buf
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -356,7 +358,7 @@
             integer :: constarg
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -367,16 +369,18 @@
 !            integer :: nargs, argstypes, 
 !            call oclrunc(ocl(oclinstid),nargs,argtypes,args)
 !        end subroutine
-        subroutine runOcl(global,local)
+
+        subroutine runOcl(global,local,exectime)
             integer :: global, local
             integer(8) :: oclinstid
+            real(4) :: exectime
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
 
-            call runoclc(ocl(oclinstid),global,local)
+            call runoclc(ocl(oclinstid),global,local,exectime)
         end subroutine
 
         subroutine oclReadBuffer(buffer,sz,array)
@@ -387,7 +391,7 @@
             real, dimension(size(array)):: array1d
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -405,7 +409,7 @@
             real, dimension(size(array)):: array1d
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -421,7 +425,7 @@
             real, dimension(sz1d):: array1d
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -437,7 +441,7 @@
             integer, dimension(sz(1),sz(2),sz(3)) :: array
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -456,7 +460,7 @@
             integer, dimension(size(array)):: array1d
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
@@ -475,28 +479,30 @@
         end subroutine
 
 
-        subroutine oclStoreBuffer(buffer, idx)
+        subroutine oclStoreBuffer(idx,buffer )
             integer(8):: buffer
             integer :: idx
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
-            oclBuffers(oclinstid,idx) = buffer
+!            print *, "STORE BUFFER ", buffer , " in INST ",oclinstid, " IDX ", idx
+            oclBuffersPerInst(oclinstid,idx) = buffer
         end subroutine oclStoreBuffer
 
-        subroutine oclLoadBuffer(buffer,idx)
+        subroutine oclLoadBuffer(idx, buffer)
             integer(8):: buffer
             integer :: idx
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0
 #endif
-            buffer = oclBuffers(oclinstid,idx)
+!            print *, "LOAD BUFFER ", buffer , " from INST ",oclinstid, " IDX ", idx
+            buffer = oclBuffersPerInst(oclinstid,idx)
         end subroutine oclLoadBuffer
 
 !$GEN WrapperSubs

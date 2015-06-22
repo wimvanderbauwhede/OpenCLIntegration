@@ -39,7 +39,7 @@ while (my $line = <$IN> ){
             integer, dimension($dim):: sz
             integer(8) :: oclinstid
 #ifdef OCL_MULTIPLE_DEVICES            
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0           
 #endif             
@@ -62,7 +62,7 @@ while (my $line = <$IN> ){
             $ftype,dimension($szstr) :: array
             integer(8) :: oclinstid            
 #ifdef OCL_MULTIPLE_DEVICES            
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0           
 #endif             
@@ -94,7 +94,7 @@ while (my $line = <$IN> ){
             $ftype, dimension($szstr) :: array
             integer(8) :: oclinstid          
 #ifdef OCL_MULTIPLE_DEVICES            
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0           
 #endif             
@@ -123,7 +123,7 @@ while (my $line = <$IN> ){
             $ftype, dimension(size(array)):: array1d
             integer(8) :: oclinstid      
 #ifdef OCL_MULTIPLE_DEVICES            
-           call oclgetoclinstancec(oclinstmap, oclinstid)
+           call oclgetinstancec(oclinstmap, oclinstid)
 #else
             oclinstid = 0           
 #endif               

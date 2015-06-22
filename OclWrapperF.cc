@@ -382,15 +382,22 @@ void oclmakewritebufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz) {
 #ifdef OCL_MULTIPLE_DEVICES
 void oclgetinstancec_(int64_t* ivp_oclinstmap, int64_t* oclinstid) {
 	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr;
+//	std::cout << "OCLINSTID TO GET: "<< *oclinstid << "\n";
+//	std::cout << "OCLINSTMAP (GET): "<< *ivp_oclinstmap << "\n";
 	// Defensive, in principle oclsetinstancec_ should have been called first but who knows
 	if(*ivp_oclinstmap == 0) { // Fortran sets the variable to 0 initially, so we can use this as a check
 		oclinstmap_ptr = new std::unordered_map<int64_t,int64_t>;
-	}
+//		std::cout << "NEW OCLINSTMAP (GET): "<< oclinstmap_ptr << "\n";
+		void* vp = (void*)oclinstmap_ptr;
+		int64_t iv =(int64_t)vp;
+		*ivp_oclinstmap = iv;
+
+	} else {
 
 	int64_t ivp = *ivp_oclinstmap;
 	void* vp=(void*)ivp;
-	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr = (std::unordered_map<int64_t,int64_t>*)vp;
-
+	oclinstmap_ptr = (std::unordered_map<int64_t,int64_t>*)vp;
+	}
 	int64_t tid = (int64_t)pthread_self();
 	*oclinstid = oclinstmap_ptr->at(tid);
 
@@ -398,16 +405,24 @@ void oclgetinstancec_(int64_t* ivp_oclinstmap, int64_t* oclinstid) {
 
 void oclsetinstancec_(int64_t* ivp_oclinstmap, int64_t* oclinstid) {
 	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr;
+//	std::cout << "OCLINSTID TO SET: "<< *oclinstid << "\n";
+//	std::cout << "OCLINSTMAP (SET): "<< *ivp_oclinstmap << "\n";
 	if(*ivp_oclinstmap == 0) { // Fortran sets the variable to 0 initially, so we can use this as a check
+
 		oclinstmap_ptr = new std::unordered_map<int64_t,int64_t>;
+//		std::cout << "NEW OCLINSTMAP (SET): "<< oclinstmap_ptr << "\n";
+		void* vp = (void*)oclinstmap_ptr;
+		int64_t iv =(int64_t)vp;
+		*ivp_oclinstmap = iv;
+	} else {
+
+		int64_t ivp = *ivp_oclinstmap;
+		void* vp=(void*)ivp;
+		oclinstmap_ptr = (std::unordered_map<int64_t,int64_t>*)vp;
 	}
-
-	int64_t ivp = *ivp_oclinstmap;
-	void* vp=(void*)ivp;
-	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr = (std::unordered_map<int64_t,int64_t>*)vp;
-
 	int64_t tid = (int64_t)pthread_self();
-	oclinstmap_ptr->at(tid) = *oclinstid;
+	oclinstmap_ptr->insert(  std::pair<int64_t,int64_t>(tid,*oclinstid) );
+
 
 }
 #endif
