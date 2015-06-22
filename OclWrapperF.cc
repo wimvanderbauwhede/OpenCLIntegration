@@ -48,7 +48,7 @@ void oclinitf_(OclWrapperF ocl_ivp,const char* source, int* srclen, const char* 
 	sstr = sstr.substr(0,*srclen);
 //	std::cout <<"oclinitf_: sstr=<"<<sstr<<">\n";
 	source=sstr.c_str();
-//    std::cout << source<<", "<<kernel<<", "<<KERNEL_OPTS<<"\n";
+    //std::cout << source<<", "<<kernel<<", <"<<KERNEL_OPTS<<">\n";
 	OclWrapper* ocl = new OclWrapper(source,kernel,KERNEL_OPTS);
 //	std::cout <<"cast\n";
 	*ocl_ivp=toWord<OclWrapper*>(ocl);
@@ -64,6 +64,7 @@ void oclinitdevf_(OclWrapperF ocl_ivp,const char* source, int* srclen, const cha
 	std::string sstr(source);
 	sstr = sstr.substr(0,*srclen);
 	source=sstr.c_str();
+    std::cout << "FORTRAN_KERNEL_OPTS: "<< KERNEL_OPTS  <<"\n";
 	OclWrapper* ocl = new OclWrapper(source,kernel,KERNEL_OPTS,*devIdx);
 	*ocl_ivp=toWord<OclWrapper*>(ocl);
 }
@@ -80,11 +81,29 @@ void oclinitoptsf_(OclWrapperF ocl_ivp,const char* source,int* srclen,const char
     std::string kopts_from_builder(KERNEL_OPTS);
     kernel_opts = (kopts_str+" "+kopts_from_builder).c_str();
     //kernel_opts = kopts_str.c_str();
-//    std::cout << "FORTRAN_KERNEL_OPTS: "<<kernel_opts<<"\n";
+    std::cout << "FORTRAN_KERNEL_OPTS: "<<kopts_str<<"\n";
+    std::cout << "FORTRAN_KERNEL_OPTS: "<<kopts_from_builder<<"\n";
 	OclWrapper* ocl = new OclWrapper(source,kernel,kernel_opts);
 	*ocl_ivp=toWord<OclWrapper*>(ocl);
 }
 
+void oclinitoptsdevf_(OclWrapperF ocl_ivp,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen, int* devIdx) {
+	std::string kstr(kernel);
+	kstr = kstr.substr(0,*klen);
+	kernel=kstr.c_str();
+	std::string sstr(source);
+	sstr = sstr.substr(0,*srclen);
+	source=sstr.c_str();
+	std::string kopts_str(kernel_opts);
+    kopts_str =  kopts_str.substr(0,*koptslen);
+    std::string kopts_from_builder(KERNEL_OPTS);
+    kernel_opts = (kopts_str+" "+kopts_from_builder).c_str();
+    //kernel_opts = kopts_str.c_str();
+    std::cout << "FORTRAN_KERNEL_OPTS: "<<kopts_str<<"\n";
+    std::cout << "FORTRAN_KERNEL_OPTS: "<<kopts_from_builder<<"\n";
+	OclWrapper* ocl = new OclWrapper(source,kernel,kernel_opts,*devIdx);
+	*ocl_ivp=toWord<OclWrapper*>(ocl);
+}
 
 void oclinitc_(OclWrapperF ocl_ivp,const char* source,const char* kernel) {
 //	std::cout <<"init\n";
@@ -360,6 +379,36 @@ void oclmakewritebufferc_(OclWrapperF ocl_ivp,OclBufferF buf_ivp, int* sz) {
 //	*buf_ivp=(int64_t)buf_ip;
 	*buf_ivp=toWord<cl::Buffer*>(buf_p);
 }
+#ifdef OCL_MULTIPLE_DEVICES
+void oclgetinstancec_(int64_t* ivp_oclinstmap, int64_t* oclinstid) {
+	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr;
+	// Defensive, in principle oclsetinstancec_ should have been called first but who knows
+	if(*ivp_oclinstmap == 0) { // Fortran sets the variable to 0 initially, so we can use this as a check
+		oclinstmap_ptr = new std::unordered_map<int64_t,int64_t>;
+	}
 
+	int64_t ivp = *ivp_oclinstmap;
+	void* vp=(void*)ivp;
+	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr = (std::unordered_map<int64_t,int64_t>*)vp;
 
+	int64_t tid = (int64_t)pthread_self();
+	*oclinstid = oclinstmap_ptr->at(tid);
+
+}
+
+void oclsetinstancec_(int64_t* ivp_oclinstmap, int64_t* oclinstid) {
+	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr;
+	if(*ivp_oclinstmap == 0) { // Fortran sets the variable to 0 initially, so we can use this as a check
+		oclinstmap_ptr = new std::unordered_map<int64_t,int64_t>;
+	}
+
+	int64_t ivp = *ivp_oclinstmap;
+	void* vp=(void*)ivp;
+	std::unordered_map<int64_t,int64_t>* oclinstmap_ptr = (std::unordered_map<int64_t,int64_t>*)vp;
+
+	int64_t tid = (int64_t)pthread_self();
+	oclinstmap_ptr->at(tid) = *oclinstid;
+
+}
+#endif
 } // extern "C"
