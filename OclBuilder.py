@@ -33,7 +33,7 @@ def initOcl(*envt):
     else:
         env=envt[0]
 
-    global opts,dev,plat,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper
+    global opts,dev,plat,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper, sel
 
     help = """
     Options:
