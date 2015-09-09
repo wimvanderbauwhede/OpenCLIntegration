@@ -14,6 +14,10 @@
 #include <string>
 #include <cctype>
 #include <algorithm>
+#ifdef OCL_MULTIPLE_DEVICES
+#include <unordered_map>
+#include <pthread.h>
+#endif
 #include "OclWrapper.h"
 
 typedef int64_t* OclBufferF;

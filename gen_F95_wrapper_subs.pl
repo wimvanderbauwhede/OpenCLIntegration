@@ -37,8 +37,14 @@ while (my $line = <$IN> ){
             integer(8):: buffer
             integer :: sz1d
             integer, dimension($dim):: sz
+            integer(8) :: oclinstid
+#ifdef OCL_MULTIPLE_DEVICES            
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0           
+#endif             
             sz1d = $szstr*$wordsz 
-            call oclMake${mode}BufferC(ocl,buffer, sz1d)
+            call oclMake${mode}BufferC(ocl(oclinstid),buffer, sz1d)
         end subroutine
         ";
                     print $OUT $code_MakeArrayBuffer;
@@ -54,9 +60,15 @@ while (my $line = <$IN> ){
             integer :: sz1d
             integer, dimension($dim):: sz
             $ftype,dimension($szstr) :: array
+            integer(8) :: oclinstid            
+#ifdef OCL_MULTIPLE_DEVICES            
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0           
+#endif             
             sz1d = size(array)*$wordsz 
 			! print *, 'oclMake${dim}D${type}Array${mode}Buffer(',sz1d,')'
-            call oclMake${mode}BufferPtrC(ocl,buffer, sz1d, array)
+            call oclMake${mode}BufferPtrC(ocl(oclinstid),buffer, sz1d, array)
         end subroutine
         ";
                     print $OUT $code_MakeArrayBuffer;
@@ -80,8 +92,14 @@ while (my $line = <$IN> ){
             integer :: sz1d
             integer, dimension($dim):: sz
             $ftype, dimension($szstr) :: array
+            integer(8) :: oclinstid          
+#ifdef OCL_MULTIPLE_DEVICES            
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0           
+#endif             
             sz1d=size(array)*$wordsz
-            call oclwritebufferc(ocl,buffer, sz1d,array)
+            call oclwritebufferc(ocl(oclinstid),buffer, sz1d,array)
         end subroutine
         ";
                 print $OUT $code_WriteBuffer;
@@ -103,8 +121,14 @@ while (my $line = <$IN> ){
             integer, dimension($dim):: sz
             $ftype,dimension($szstr) :: array
             $ftype, dimension(size(array)):: array1d
+            integer(8) :: oclinstid      
+#ifdef OCL_MULTIPLE_DEVICES            
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0           
+#endif               
             sz1d = size(array)*$wordsz
-            call oclreadbufferc(ocl,buffer,sz1d,array1d)
+            call oclreadbufferc(ocl(oclinstid),buffer,sz1d,array1d)
             array = reshape(array1d,shape(array))
         end subroutine
         ";

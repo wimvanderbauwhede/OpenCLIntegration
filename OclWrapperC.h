@@ -17,7 +17,10 @@ typedef int64_t* OclWrapperF;
 void oclinitc_(OclWrapperF ocl,const char* source,const char* kernel);
 void oclinitoptsc_(OclWrapperF ocl,const char* source,const char* kernel,const char* kernel_opts);
 void oclinitf_(OclWrapperF ocl,const char* source,int* srclen, const char* kernel, int* klen);
+void oclinitdevf_(OclWrapperF ocl,const char* source,int* srclen, const char* kernel, int* klen, int* devIdx);
 void oclinitoptsf_(OclWrapperF ocl,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen);
+void oclinitoptsdevf_(OclWrapperF ocl,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen, int* devIdx);
+
 void oclgetmaxcomputeunitsc_(OclWrapperF ocl,int* nunits);
 void oclgetnthreadshintc_(OclWrapperF ocl,int* nthreads);
 
@@ -40,7 +43,10 @@ void oclsetintconstargc_(OclWrapperF ocl,int* pos, int* constarg);
 // this assumes we have no more than 64 arguments ...
 void oclrunc_(OclWrapperF ocl,int* nargs,int64_t argtypes, int64_t* args);
 void runoclc_(OclWrapperF ocl,int* global , int* local, float* exectime);
-
+#ifdef OCL_MULTIPLE_DEVICES
+void oclsetinstancec_(int64_t* ivp_oclinstmap, int64_t* ivp_oclinstid );
+void oclgetinstancec_(int64_t* ivp_oclinstmap, int64_t* ivp_oclinstid );
+#endif
 // I want it a lot simpler:
 /*
    What we do is , we check for every argument what its status is
