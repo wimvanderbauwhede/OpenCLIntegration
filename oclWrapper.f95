@@ -19,6 +19,8 @@
 !#endif
         integer, dimension(32,3) :: oclBufferShapes ! Not used
         integer :: oclGlobalRange, oclLocalRange ! Does not need to be package global, can be defined locally in the module doing the API calls
+        integer, dimension(2) :: oclGlobal2DRange, oclLocal2DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
+        integer, dimension(3) :: oclGlobal3DRange, oclLocal3DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         save
         contains
 
@@ -380,8 +382,31 @@
 #else
             oclinstid = 0
 #endif
-
             call runoclc(ocl(oclinstid),global,local,exectime)
+        end subroutine
+
+        subroutine runOcl2DRange(global,local,exectime)
+            integer, dimension(2) :: global, local
+            integer(8) :: oclinstid
+            real(4) :: exectime
+#ifdef OCL_MULTIPLE_DEVICES
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0
+#endif
+            call runoclc2d(ocl(oclinstid),global,local,exectime)
+        end subroutine
+
+        subroutine runOcl3DRange(global,local,exectime)
+            integer, dimension(3) :: global, local
+            integer(8) :: oclinstid
+            real(4) :: exectime
+#ifdef OCL_MULTIPLE_DEVICES
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0
+#endif
+            call runoclc3d(ocl(oclinstid),global,local,exectime)
         end subroutine
 
         subroutine oclReadBuffer(buffer,sz,array)

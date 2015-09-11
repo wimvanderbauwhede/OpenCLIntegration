@@ -247,6 +247,34 @@ void runoclc_(OclWrapperF ocl_ivp,int* global , int* local, float* ext_time) {
     */
 };
 
+void runoclc3d_(OclWrapperF ocl_ivp,int* global , int* local, float* ext_time) {
+	//std::cout <<"unwrap pointer "<<ocl_ivp<<"\n";
+	OclWrapper* ocl = fromWord<OclWrapper*>(*ocl_ivp);
+	//std::cout <<"create ranges "<<(*global)<<","<<(*local)<<"\n";
+    if (local[0]!=0) {
+    	cl::NDRange global_range(global[0],global[1],global[2]);
+    	cl::NDRange local_range(local[0],local[1],local[2]);
+    	*ext_time = ocl->enqueueNDRangeRun(global_range,local_range);
+    } else {
+    	cl::NDRange global_range(global[0],global[1],global[2]);
+    	*ext_time = ocl->enqueueNDRangeRun(global_range);
+    }
+};
+
+void runoclc2d_(OclWrapperF ocl_ivp,int* global , int* local, float* ext_time) {
+	//std::cout <<"unwrap pointer "<<ocl_ivp<<"\n";
+	OclWrapper* ocl = fromWord<OclWrapper*>(*ocl_ivp);
+	//std::cout <<"create ranges "<<(*global)<<","<<(*local)<<"\n";
+    if (local[0]!=0) {
+    	cl::NDRange global_range(global[0],global[1]);
+    	cl::NDRange local_range(local[0],local[1]);
+    	*ext_time = ocl->enqueueNDRangeRun(global_range,local_range);
+    } else {
+    	cl::NDRange global_range(global[0],global[1]);
+    	*ext_time = ocl->enqueueNDRangeRun(global_range);
+    }
+};
+
 /*
  //    oclmakereadbuffer_(&ocl_ivp,&mA_buf_ivp,sizeof(cl_float) * mSize);
 
