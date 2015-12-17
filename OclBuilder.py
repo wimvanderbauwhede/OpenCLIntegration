@@ -35,12 +35,16 @@ def initOcl(*envt):
 
     global opts,dev,plat,multi,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper, sel
 
+    OPENCL_DIR=os.environ['OPENCL_DIR']
+    
+    envsh = open(OPENCL_DIR+'/OpenCLIntegration/ocl_env.sh', "r")
+    envs =envsh.read()
     help = """
     Options:
      lib=0|1 [1] build an OclWrapper library
     *dyn=0|1 [0] build a dynamic Library             OclBuilder.useDyn
     *mcm=s|m|l [s] mcmodel flag for gcc/gfortran
-    *plat=AMD|NVIDIA|Intel|Altera|MIC [NVIDIA]
+    *plat=AMD|NVIDIA|Intel|Altera|Xilinx|MIC [NVIDIA]
     *dev=CPU|GPU|ACC|FPGA [GPU] device
      gpu=-1|0|1 [-1, means automatic selection]
      acc=-1|0|1 [-1, means automatic selection]
@@ -75,7 +79,11 @@ def initOcl(*envt):
     The options marked with * can be set as OclBuilder.OPTION=VALUE in the SCons script
     The macros controlled by the other options are listed on the right
     The directory for the OclWrapper can be accessed via OclBuilder.OPENCL_DIR
-    """
+
+    The following environment variables must be set (see OPENCL_DIR/OpenCLIntegration/ocl_env.sh):
+
+    """ + envs
+
    # by default, use the OclWrapper.
     if not 'useOclWrapper' in globals():    
         useOclWrapper = True
@@ -87,7 +95,6 @@ def initOcl(*envt):
         OSX=0
         OSFLAG='-D__LINUX__'
 
-    OPENCL_DIR=os.environ['OPENCL_DIR']
     opts=Variables()        
     CWD= os.environ['PWD']
     args=sys.argv[1:]
@@ -131,6 +138,10 @@ def initOcl(*envt):
                 elif os.environ['OPENCL_ACC']=='Altera':
                     ALTERA_SDK_PATH=os.environ['ALTERAOCLSDKROOT']
                     plat='Altera'
+                    dev='FPGA'
+                elif os.environ['OPENCL_ACC']=='Xilinx':
+                    XILINX_SDK_PATH=os.environ['SDACCELROOT'] 
+                    plat='Xilinx'
                     dev='FPGA'
                 elif os.environ['OPENCL_CPU']=='Intel':
                     INTEL_SDK_PATH=os.environ['INTELOCLSDKROOT']
@@ -295,6 +306,18 @@ def initOcl(*envt):
             env.Append(LIBPATH=[ALTERA_SDK_PATH+'/host/linux64/lib',ALTERA_SDK_PATH+'/board/nalla_pcie/linux64/lib']) #,ALTERA_SDK_PATH+'/'+os.environ['AOCL_BOARD_PACKAGE_ROOT']+'/linux64/lib'])
             env.Append(LIBS=['alteracl', 'dl', 'acl_emulator_kernel_rt', 'alterahalmmd', 'nalla_pcie_mmd', 'elf', 'rt', 'stdc++'])
             env.Append(CXXFLAGS = ['-fPIC'])
+        elif plat=='Xilinx':
+#DSA := xilinx:adm-pcie-7v3:1ddr:1.0
+#XOCC := $(XILINX_SDACCEL)/bin/xocc
+            XILINX_OPENCL = XILINX_SDK_PATH
+            OPENCL_INC = XILINX_OPENCL+'/runtime/include/1_2'
+            OPENCL_LIB = XILINX_OPENCL+'/runtime/lib/x86_64'
+#CLFLAGS := -g --xdevice $(DSA)
+#export XCL_PLATFORM=xilinx_adm-pcie-7v3_1ddr_1_0   
+            env.Append(CPPPATH=map(lambda s: XILINX_SDK_PATH+s, ['/runtime/include/1_2'])) 
+            env.Append(LIBPATH=[XILINX_SDK_PATH+'/runtime/lib/x86_64']) 
+            #env.Append(LIBS=['xilinxcl', 'dl', 'acl_emulator_kernel_rt', 'xilinxhalmmd', 'FIXMEnalla_pcie_mmd', 'elf', 'rt', 'stdc++'])
+            #env.Append(CXXFLAGS = ['-fPIC'])
         else: # means NVIDIA
             env.Append(CPPPATH=[NVIDIA_SDK_PATH+'/OpenCL/common/inc' ,NVIDIA_SDK_PATH+'/OpenCL/common/inc/CL'])
 
