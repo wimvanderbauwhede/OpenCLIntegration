@@ -109,7 +109,7 @@ nPlatforms(0), ncalls(0) {
 #else
     // For the FPGA we need to see if there is an aocx file and load it
     std::string cl_file(ksource);
-    std::string file_name = cl_file.substr(0,cl_file.size()-2);
+    std::string file_name = cl_file.substr(0,cl_file.size()-3); // FIXME: make it work with any extension!
     std::string aocx_file = file_name+".aocx";
 #ifdef VERBOSE
     std::cout <<"Looking for "<<aocx_file <<" for " << ksource<<"\n";
