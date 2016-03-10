@@ -74,7 +74,7 @@ def initOcl(*envt):
                     For example, to add a path for kernel includes:
                     OclBuilder.kopts='-I/abs/path/to/includes'
 
-    D=[comma-sep list of macros, without values]
+    D=[comma-sep list of host-only macros, without values]
 
     The options marked with * can be set as OclBuilder.OPTION=VALUE in the SCons script
     The macros controlled by the other options are listed on the right
