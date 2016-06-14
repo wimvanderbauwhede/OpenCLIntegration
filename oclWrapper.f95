@@ -13,11 +13,11 @@
 ! So I haven't solved this satisfactorily
 ! A better way might be to use setters and getters for this, so that you would say "call oclStoreBuffer()" and "call oclLoadBuffer()"
 
-        integer(8), dimension(32) :: oclBuffers ! Is used in user code and would need to be per-thread unique
+        integer(8), dimension(256) :: oclBuffers ! Is used in user code and would need to be per-thread unique
 !#ifdef OCL_MULTIPLE_DEVICES
-        integer(8), dimension(0:7,32) :: oclBuffersPerInst ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
+        integer(8), dimension(0:7,256) :: oclBuffersPerInst ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
 !#endif
-        integer, dimension(32,3) :: oclBufferShapes ! Not used
+        integer, dimension(256,3) :: oclBufferShapes ! Not used
         integer :: oclGlobalRange, oclLocalRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         integer, dimension(2) :: oclGlobal2DRange, oclLocal2DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         integer, dimension(3) :: oclGlobal3DRange, oclLocal3DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
