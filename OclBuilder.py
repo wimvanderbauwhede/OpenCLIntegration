@@ -60,6 +60,7 @@ def initOcl(*envt):
      w=<number> [1024] width, e.g. for matrix        WIDTH 
      wx,wy,wz=<number> [128,128,64] x/y/z dimensions WX,WY,WZ
      nth=<number> [1] number of threads per core     NTH
+     nunits=<number> [1] number of compute units		 NUNITS
      ngroups=<number> [0] number of workgroups		 NGROUPS
      order=<number> [1] loop order			         LOOP_ORDER 
      ref=0|1|2 [1]     reference 2=ref only          REF
@@ -167,6 +168,7 @@ def initOcl(*envt):
     kernel=getOpt('kernel','KERNEL','1')
     sel=getOpt('sel','SELECT','1')
     nth=getOpt('nth','#threads','1')
+    nunits=getOpt('nunits','#compute units','1')
     ngroups=getOpt('ngroups','#workgroups','0')
     loop_order=getOpt('order','loop order','1')
 
@@ -185,6 +187,7 @@ def initOcl(*envt):
     env.Append(KERNEL_OPTS=['-DKERNEL='+kernel])
     env.Append(KERNEL_OPTS=['-DSELECT='+sel])
     env.Append(KERNEL_OPTS=['-DNTH='+nth])
+    env.Append(KERNEL_OPTS=['-DNUNITS='+nunits])
     env.Append(KERNEL_OPTS=['-DWIDTH='+width])
     env.Append(KERNEL_OPTS=['-DWX='+wx])
     env.Append(KERNEL_OPTS=['-DWY='+wy])
