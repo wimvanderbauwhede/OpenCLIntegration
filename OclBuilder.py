@@ -60,9 +60,9 @@ def initOcl(*envt):
      w=<number> [1024] width, e.g. for matrix        WIDTH 
      wx,wy,wz=<number> [128,128,64] x/y/z dimensions WX,WY,WZ
      nth=<number> [1] number of threads per core     NTH
-     nunits=<number> [1] number of compute units		 NUNITS
-     ngroups=<number> [0] number of workgroups		 NGROUPS
-     order=<number> [1] loop order			         LOOP_ORDER 
+     nunits=<number> [1] number of compute units         NUNITS
+     ngroups=<number> [0] number of workgroups         NGROUPS
+     order=<number> [1] loop order                     LOOP_ORDER 
      ref=0|1|2 [1]     reference 2=ref only          REF
      v=0|1 [1]         verbose                       VERBOSE 
      warn=0|1 [1]      warnings                      WARNINGS
@@ -158,11 +158,11 @@ def initOcl(*envt):
     acc=getOpt('acc','ACC','-1')
     devidxflag='-DDEVIDX=-1'
     if gpu!='-1':
-    	devidxflag='-DDEVIDX='+gpu
+        devidxflag='-DDEVIDX='+gpu
         dev='GPU'    
 
     if acc!='-1':
-    	devidxflag='-DDEVIDX='+acc
+        devidxflag='-DDEVIDX='+acc
         dev='ACC'
         
     kernel=getOpt('kernel','KERNEL','1')
@@ -204,6 +204,8 @@ def initOcl(*envt):
 
     warnings=getOpt('warn','Warnings','1')
     wflag='-Wall'
+    if ('PGCXX' in os.environ and os.environ['CXX'] == os.environ['PGCXX']):
+       wflag = ''
     if warnings=='0':
         vflag=''
 
@@ -255,8 +257,8 @@ def initOcl(*envt):
         DEVFLAGS+=['-DFPGA']
     if dev=='CPU':
         dbg_dev=dbgmacro+' '        
-    else:	
-	    dbg_dev=''
+    else:    
+        dbg_dev=''
     kernel_opts='\\"'+kopts+' -DEXT_DEFS '+dbg_dev+(' '.join(env['KERNEL_OPTS']))+'\\"'
     KERNEL_OPTS=['-DKERNEL_OPTS='+kernel_opts+''] 
     if commands.getoutput("uname") == "Darwin":
@@ -274,7 +276,12 @@ def initOcl(*envt):
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
     if True or plat!='Altera':
-        env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+        #if ('GCXX' in  os.environ and  os.environ['CXX'] ==  os.environ['GCXX']): # and int(os.environ['GCXX_VERSION'])<480):
+        if ('GCXX' in  os.environ and  os.environ['CXX'] ==  os.environ['GCXX'] and int(os.environ['GCXX_VERSION'])<480):
+            print('OLD GCXX: '+os.environ['GCXX_VERSION'])
+            env.Append(CXXFLAGS = ['-std=c++0x','-m64','-fPIC','-DOLD_CXX',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+        else:
+            env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     else:    
         env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
@@ -322,7 +329,7 @@ def initOcl(*envt):
             #env.Append(LIBS=['xilinxcl', 'dl', 'acl_emulator_kernel_rt', 'xilinxhalmmd', 'FIXMEnalla_pcie_mmd', 'elf', 'rt', 'stdc++'])
             #env.Append(CXXFLAGS = ['-fPIC'])
         else: # means NVIDIA
-            env.Append(CPPPATH=[NVIDIA_SDK_PATH+'/OpenCL/common/inc' ,NVIDIA_SDK_PATH+'/OpenCL/common/inc/CL'])
+            env.Append(CPPPATH=[NVIDIA_SDK_PATH+'/include',NVIDIA_SDK_PATH+'/OpenCL/common/inc' ,NVIDIA_SDK_PATH+'/OpenCL/common/inc/CL'])
 
     if useF=='1':
         if 'FORTRAN_COMPILER' in os.environ:
@@ -340,12 +347,16 @@ def initOcl(*envt):
 #env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-mcmodel=medium','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
             env['F95FLAGS']=['-Wno-aliasing','-Wno-unused','-Wno-unused-dummy-argument','-cpp','-m64','-ffree-form','-ffree-line-length-0','-fconvert=big-endian']
             env.Append(F95FLAGS=env['CFLAGS'])
-        else:
+        else :
             env['CFLAGS'].pop(0)
             env['CFLAGS'].pop(0)
             env['CFLAGS'].pop(0)
             env['FORTRANFLAGS']=env['CFLAGS']
-            env.Append(FORTRANFLAGS=['-m64','-fast','-Mipa=fast'])
+            if ('PGFORTRAN' in os.environ and env['FORTRAN'] == os.environ['PGFORTRAN']) : 
+                env.Append(FORTRANFLAGS=['-cpp','-m64','-fast','-Mfree','-Mipa=fast'])
+                env['F95FLAGS']=env['FORTRANFLAGS']
+            else:
+                print('Unknown compiler, no options specified.')
         if useOclWrapper:
             if useDyn=='1':
                 flib = env.SharedLibrary('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
