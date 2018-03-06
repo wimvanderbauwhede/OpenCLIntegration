@@ -135,7 +135,7 @@ In your Fortran code:
       oclReadBuffer(...)
       ! There are  many more API calls, see `oclWrapper.f95` code
 
-### Perl applications
+### Perl API
 
 In your Perl code:
 
