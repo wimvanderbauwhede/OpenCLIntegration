@@ -170,7 +170,7 @@
 #endif
 
 #if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenGL/OpenGL.h>
+//#include <OpenGL/OpenGL.h>
 #include <OpenCL/opencl.h>
 #include <libkern/OSAtomic.h>
 #else
