@@ -515,9 +515,9 @@ void OclWrapper::storeBinary(const char* kbinname) {
 
 
 #ifdef OCLV2
-	std::vector<::size_t> binarySizes;
+	std::vector< ::size_t > binarySizes;
 #else
-	cl::vector<::size_t> binarySizes;
+	cl::vector< ::size_t > binarySizes;
 #endif
 
     err = program_p->getInfo(CL_PROGRAM_BINARY_SIZES, &binarySizes);
@@ -798,7 +798,11 @@ cl::Buffer& OclWrapper::makeWriteBuffer(int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            CL_MEM_WRITE_ONLY,
+#ifdef OLD_CXX
+	            (::size_t)bufSize,NULL,&err);
+#else
 	            (::size_t)bufSize,nullptr,&err);
+#endif
 	 checkErr(err, "Buffer::Buffer()");
 	cl::Buffer& buf_r = *buf_p;
 	return buf_r;
@@ -808,7 +812,11 @@ void OclWrapper::makeWriteBufferPos(int argpos, int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
 	            CL_MEM_WRITE_ONLY,
+#ifdef OLD_CXX
+	            (::size_t)bufSize,NULL,&err);
+#else
 	            (::size_t)bufSize,nullptr,&err);
+#endif
 	 checkErr(err, "Buffer::Buffer()");
     buf[argpos]=buf_p;
     cl::Buffer& buf_r=*buf_p;
