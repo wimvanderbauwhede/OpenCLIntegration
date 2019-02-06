@@ -1,5 +1,5 @@
 /*
- * (c) 2011 Wim Vanderbauwhede <wim.vanderbauwhede@gmail.com>
+ * (c) 2011-now Wim Vanderbauwhede <wim.vanderbauwhede@mail.be>
  *
  * */
 
@@ -29,7 +29,6 @@ useACC(false),
 #endif
 #endif
 nPlatforms(0), ncalls(0) {
-//std::cout << "Default constructor\n";
 	    // First check the Platform
 		cl::Platform::get(&platformList);
 		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
@@ -46,9 +45,9 @@ nPlatforms(0), ncalls(0) {
 		selectDevice();
 		createQueue();
         initArgStatus();
-//std::cout << "Default constructor DONE\n";
         
     }
+
 // This is the Ctor used for Fortran oclInit()
 OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts,int devIdx) :
 #ifdef DEV_GPU
@@ -126,57 +125,88 @@ nPlatforms(0), ncalls(0) {
 		createQueue();
         initArgStatus();
 }
-/*
-void OclWrapper::initOclWrapper(const char* ksource, const char* kname, const char* kopts)  {
+
+// This is the Ctor used for Fortran oclInitMultiKernel() with multiple kernels. We add the kernel names later.
+OclWrapper::OclWrapper (const char* ksource,int devIdx) :
 #ifdef DEV_GPU
-useCPU=false;
-useGPU=true;
-useACC=false;
+useCPU(false),
+useGPU(true),
+useACC(false),
 #else
 #ifdef DEV_ACC
-useCPU=false;
-useGPU=false;
-useACC=true;
+useCPU(false),
+useGPU(false),
+useACC(true),
 #else
-useCPU=true;
-useGPU=false;
-useACC=false;
+useCPU(true),
+useGPU(false),
+useACC(false),
 #endif
 #endif
+nPlatforms(0), ncalls(0) {
 
-
-	nPlatforms=0;
-	ncalls=0;
-
-    // First check the Platform
-	cl::Platform::get(&platformList);
-	checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
+	    // First check the Platform
+		cl::Platform::get(&platformList);
+		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
 #ifdef VERBOSE
-	std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
+//		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
 #endif
-	nPlatforms=platformList.size();
+		nPlatforms=platformList.size();
 #ifdef PLATINFO
-	for (unsigned int i=0;i<platformList.size();i++) {
-		platformInfo.show(platformList,i);
-	}
+		for (unsigned int i=0;i<platformList.size();i++) {
+			platformInfo.show(platformList,i);
+		}
+#endif
+#ifdef DEVIDX
+#if DEVIDX != -1
+		selectDevice( DEVIDX );
+#else
+		selectDevice();
+#endif
+#else
+        if (devIdx == -1) {
+		selectDevice();
+        } else {
+		selectDevice(devIdx);
+        }
 #endif
 
-	selectDevice();
-	if (strcmp(kopts,"")==0) {
+#ifndef FPGA
+/*
+ // Don't load the kernel as there is more than one
+
+	if (strcmp(kopts,"")==0) { // meaning kopts is empty, use kernelOpts instead
 		 std::string stlstr=kernelOpts.str();
 		 kernel_opts = stlstr.c_str();
 		 std::cout << "initOclWrapper: KERNEL_OPTS: "<<kernel_opts << "\n";
 		 loadKernel( ksource,  kname, kernel_opts);
-			std::cout << "initOclWrapper: loaded kernel\n";
+		std::cout << "initOclWrapper: loaded kernel\n";
 	} else {
 		loadKernel( ksource,  kname, kopts);
 	}
-	createQueue();
-//			std::cout << "initOclWrapper: created queue\n";
-    initArgStatus();
-//			std::cout << "initOclWrapper: initialised ArgStatus\n";
-}
 */
+#else
+    // For the FPGA we need to see if there is an aocx file and load it
+    std::string cl_file(ksource);
+    std::string file_name = cl_file.substr(0,cl_file.size()-3); // FIXME: make it work with any extension!
+    std::string aocx_file = file_name+".aocx";
+#ifdef VERBOSE
+    std::cout <<"Looking for "<<aocx_file <<" for " << ksource<<"\n";
+#endif
+    const char* aocx_file_str = aocx_file.c_str();
+    if(access( aocx_file_str, F_OK ) != -1 ) {
+    	loadBinary(aocx_file_str);
+    //loadKernel(kname);
+    } else {
+        std::cerr << "Could not find "<<aocx_file<<"\n";
+        exit(0);
+    }
+#endif
+		createQueue();
+        initArgStatus();
+}
+
+
 OclWrapper::OclWrapper (int devIdx) :
 #ifdef DEV_GPU
 useCPU(false),
@@ -213,23 +243,6 @@ useACC(false),
         initArgStatus();
     };
 
-//OclWrapper::OclWrapper () : nPlatforms(0) {
-//	    // First check the Platform
-//		cl::Platform::get(&platformList);
-//		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
-//#ifdef VERBOSE
-//		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
-//#endif
-//		nPlatforms=platformList.size();
-//#ifdef PLATINFO
-//		for (unsigned int i=0;i<platformList.size();i++) {
-//			std::cout << "Platform["<< i << "]\n";
-//			platformInfo.show(platformList,i);
-//		}
-//#endif
-//        initArgStatus();
-//
-//   }
 // ----------------------------------------------------------------------------------------
 // Other public methods
 // ----------------------------------------------------------------------------------------
@@ -556,6 +569,10 @@ void OclWrapper::reloadKernel(const char* kname) {
 void OclWrapper::loadKernel(const char* kname) {
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
+#ifdef MULTI_KERNEL
+    std::string knamestr(kname);
+    kernels_map.insert(knamestr,kernel_p);
+#endif
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname) {
@@ -570,6 +587,10 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     //std::cout << "new Kernel\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
+#ifdef MULTI_KERNEL
+    std::string knamestr(kname);
+    kernels_map.insert(knamestr,kernel_p);
+#endif
     checkErr(err, "Kernel::Kernel()");
 }
 void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* opts) {
@@ -578,6 +599,10 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* o
     //std::cerr << "new Kernel <"<< kname <<">\n";
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
+#ifdef MULTI_KERNEL
+    std::string knamestr(kname);
+    kernels_map.insert(knamestr,kernel_p);
+#endif
     std::string err_str("loadKernel::Kernel(");
     err_str+=kname;
     err_str+=")";
@@ -587,7 +612,6 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* o
 
 
 void OclWrapper::createQueue() {
-   // std::cout << "Device Idx: "<<deviceIdx<<"\n";
 	
     // Create the CommandQueue
 #ifndef OPENCL_TIMINGS
@@ -597,6 +621,7 @@ void OclWrapper::createQueue() {
 #endif
     checkErr(err, "CommandQueue::CommandQueue()");
 }
+
 void OclWrapper::setArg(unsigned int idx, const cl::Buffer& buf) {
     err = kernel_p->setArg(idx, buf );
     checkErr(err, "Kernel::setArg()");
@@ -609,6 +634,25 @@ void OclWrapper::setArg(unsigned int idx, const int buf) {
     err = kernel_p->setArg(idx, buf );
     checkErr(err, "Kernel::setArg()");
 }
+
+#ifdef MULTI_KERNEL
+void OclWrapper::setKernelArg(std::string kname, unsigned int idx, const cl::Buffer& buf) {
+	cl::Kernel* kernel_p = kernels_map.at(kname);
+    err = kernel_p->setArg(idx, buf );
+    checkErr(err, "Kernel::setArg()");
+}
+void OclWrapper::setKernelArg(std::string kname, unsigned int idx, const float buf) {
+	cl::Kernel* kernel_p = kernels_map.at(kname);
+    err = kernel_p->setArg(idx, buf );
+    checkErr(err, "Kernel::setArg()");
+}
+void OclWrapper::setKernelArg(std::string kname, unsigned int idx, const int buf) {
+	cl::Kernel* kernel_p = kernels_map.at(kname);
+    err = kernel_p->setArg(idx, buf );
+    checkErr(err, "Kernel::setArg()");
+}
+#endif
+
 
 int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 //    std::cout << "enqueueNDRangeRun( )\n";
@@ -681,22 +725,7 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
             checkErr(err, "CommandQueue::CommandQueue()");
     }
 	ncalls++;
-// VERBOSE
-//	std::cout << "# kernel calls: "<<ncalls <<std::endl;
-	//cl::Event* event = new cl::Event;
 	cl::Event event; 
-//	std::cout << "ocl:"<<this<<"\n";
-//    std::cout << "queue_p:"<<queue_p<<"\n";
-//    std::cout << "kernel_p:"<<kernel_p<<"\n";
-//    std::cout << "FIXME! enqueueNDRangeKernel is commented out!\n";
-    // the kernel can be queried successfully ...
-#ifdef VERBOSE
-    // When calling from Fortran, the next line gives the error:
-    // mataccF(3498,0x7fff70c14cc0) malloc: *** error for object 0x1000d1840: pointer being freed was not allocated
-    // *** set a breakpoint in malloc_error_break to debug
-    //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
-    //std::cout << infostr <<"\n";
-#endif // VERBOSE
 
     bool zeroGlobalRange = (globalRange==0) ? true : false;
     bool zeroLocalRange = (localRange == 0) ? true : false;
@@ -710,7 +739,6 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
 				    cl::NullRange,cl::NullRange,
 				    NULL,&event);
 	    } else {
-		    //      std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
 		    err = queue_p->enqueueNDRangeKernel(
 				    *kernel_p,
 				    cl::NullRange,
@@ -727,7 +755,6 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
 				    cl::NullRange,cl::NDRange(localRange),
 				    NULL,&event);
 	    } else {
-		    //    std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
 		    err = queue_p->enqueueNDRangeKernel(
 				    *kernel_p,
 				    cl::NullRange,
@@ -736,19 +763,78 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
 				    NULL,&event);
 	    }
     }
-   // std::cout<<"call to event.wait()\n";
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
 #ifdef OPENCL_TIMINGS
 	float kernel_exec_time=getExecutionTime(event);
-//	std::cout << "Kernel execution time: "<<kernel_exec_time<<"\n";
 #else
 	float kernel_exec_time=(float)ncalls;
 #endif
-	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
-  //  std::cout << "done waiting\n";
-    //delete event;
     return kernel_exec_time;
 }
+
+float OclWrapper::enqueueTaskKernel(std::string kname) {
+	// Create the CommandQueue
+    if ((void*)queue_p==NULL) {
+#ifdef VERBOSE
+			std::cout<<"Creating queue...\n";
+#endif
+			queue_p = new cl::CommandQueue(*context_p, devices[deviceIdx], 0, &err);
+            checkErr(err, "CommandQueue::CommandQueue()");
+    }
+	ncalls++;
+	cl::Event event;
+	cl::Kernel* kernel_p = kernels_map.at(kname);
+	err = queue_p->enqueueTask(kernel_p, NULL, &event);
+
+/*
+    bool zeroGlobalRange = (globalRange==0) ? true : false;
+    bool zeroLocalRange = (localRange == 0) ? true : false;
+
+    if (zeroLocalRange) {
+	    if (zeroGlobalRange) {
+		    std::cerr << "WARNING: GlobalRange is 0!\n";
+		    err = queue_p->enqueueNDRangeKernel(
+				    *kernel_p,
+				    cl::NullRange,
+				    cl::NullRange,cl::NullRange,
+				    NULL,&event);
+	    } else {
+		    err = queue_p->enqueueNDRangeKernel(
+				    *kernel_p,
+				    cl::NullRange,
+				    //*globalRange,*localRange,
+				    cl::NDRange(globalRange),cl::NullRange,
+				    NULL,&event);
+	    }
+    } else {
+	    if (zeroGlobalRange) {
+		    std::cerr << "WARNING: GlobalRange is 0!\n";
+		    err = queue_p->enqueueNDRangeKernel(
+				    *kernel_p,
+				    cl::NullRange,
+				    cl::NullRange,cl::NDRange(localRange),
+				    NULL,&event);
+	    } else {
+		    err = queue_p->enqueueNDRangeKernel(
+				    *kernel_p,
+				    cl::NullRange,
+				    //*globalRange,*localRange,
+				    cl::NDRange(globalRange),cl::NDRange(localRange),
+				    NULL,&event);
+	    }
+    }
+*/
+	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+#ifdef OPENCL_TIMINGS
+	float kernel_exec_time=getExecutionTime(event);
+#else
+	float kernel_exec_time=(float)ncalls;
+#endif
+    return kernel_exec_time;
+}
+
+
+
 
 int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue

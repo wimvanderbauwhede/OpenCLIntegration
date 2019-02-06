@@ -47,6 +47,9 @@
 #include <cstdlib>
 //#include <iterator>
 //#include <Timing.h>
+#ifdef MULTI_KERNEL
+#include <unordered_map>
+#endif
 
 #include <DeviceInfo.h>
 #include <PlatformInfo.h>
@@ -67,10 +70,24 @@ enum DeviceType { CPU, GPU, ACC };
 #else
 #define CL_MEM_READ_MODE CL_MEM_COPY_HOST_PTR // default
 #endif
-
+/*
+ * WV 2019-02-06
+ * To support FPGA pipelines, we need the following:
+ * - Name of the binary
+ * - Names of the kernels in the binary
+ * - We will have a single Program with multiple Kernels
+ * - There is still a single Context and a single CommandQueue
+ * The main complication is that setArg needs to be for the correct kernel.
+ * oclSet*ArgKernel(kstrp, other args)
+ * With multiple kernels, the constructor takes a vector of kernel name strings, and for each of them does a push_back() on kernel_ps and kernels
+ * I think it is most convenient to add a map<std::string, cl::Kernel*> so that we can find the kernel by name.
+ * */
 class OclWrapper {
 	private:
-		std::string kernelsource;
+		std::string kernelsource; // This is UNUSED!
+#ifdef MULTI_KERNEL
+		std::unordered_map<std::string,cl::Kernel*> kernels_map;
+#endif
 #ifdef OCLV2
 		std::vector<cl::Platform> platformList;
 #else
@@ -97,17 +114,28 @@ class OclWrapper {
 		cl::vector<cl::Device> devices;
 #endif
 		cl::Context* context_p;
+#ifndef MULTI_KERNEL
 		cl::Kernel* kernel_p;
 		cl::Kernel kernel;
+#else
+		std::vector<cl::Kernel*> kernel_ps;
+		std::vector<cl::Kernel> kernels;
+#endif
 		cl::Program* program_p;
+
 #ifndef OCLV2
 		cl::KernelFunctor runKernel;
 		cl::KernelFunctor kernel_functor;
 #else
 		OclKernelFunctor runKernel;
 #endif
+#ifndef MULTI_KERNEL
 		cl::CommandQueue* queue_p;
 		cl::CommandQueue queue;
+#else
+		std::vector<cl::CommandQueue*> queue_ps;
+		std::vector<cl::CommandQueue> queues;
+#endif        
 		cl::Buffer* buf[NBUFS];
 		cl::Buffer* buf_p;
 		int nPlatforms;
@@ -171,6 +199,11 @@ class OclWrapper {
 		void setArg(unsigned int idx, const cl::Buffer& buf);
 		void setArg(unsigned int idx, const int buf);
 		void setArg(unsigned int idx, const float buf);
+#ifdef MULTI_KERNEL
+		void setKernelArg(std::string kname, unsigned int idx, const cl::Buffer& buf);
+		void setKernelArg(std::string kname, unsigned int idx, const int buf);
+		void setKernelArg(std::string kname, unsigned int idx, const float buf);
+#endif
 		int enqueueNDRangeOffset(const cl::NDRange& = cl::NDRange(0),const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		int enqueueNDRange(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		int enqueueNDRangeRun(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);

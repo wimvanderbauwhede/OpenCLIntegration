@@ -13,18 +13,36 @@
 ! So I haven't solved this satisfactorily
 ! A better way might be to use setters and getters for this, so that you would say "call oclStoreBuffer()" and "call oclLoadBuffer()"
 
-        integer(8), dimension(256) :: oclBuffers ! Is used in user code and would need to be per-thread unique
+        integer(8), dimension(32) :: oclBuffers ! Is used in user code and would need to be per-thread unique
 !#ifdef OCL_MULTIPLE_DEVICES
-        integer(8), dimension(0:7,256) :: oclBuffersPerInst ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
+        integer(8), dimension(0:7,32) :: oclBuffersPerInst ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
 !#endif
-        integer, dimension(256,3) :: oclBufferShapes ! Not used
+        integer, dimension(32,3) :: oclBufferShapes ! Not used
         integer :: oclGlobalRange, oclLocalRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         integer, dimension(2) :: oclGlobal2DRange, oclLocal2DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         integer, dimension(3) :: oclGlobal3DRange, oclLocal3DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         save
         contains
 
-!        subroutine oclInit(srcstr,srclen,kstr,klen)
+
+
+! To support multiple kernels, kstr and klen need to be arrays. Probably a better way is to use a subroutine addKernel(kstrp)
+        subroutine oclInitMultiKernel(srcstrp)
+            integer(8) :: oclinstid
+            integer :: srclen
+            character(len=*) :: srcstrp
+            character(len=:), allocatable :: srcstr
+            srclen = len(srcstrp)
+            klen = len(kstrp)
+            allocate(character(len=srclen) :: srcstr)
+            srcstr=srcstrp
+            oclinstid = 0
+#ifdef OCL_MULTIPLE_DEVICES
+            call oclsetinstancec(oclinstmap, oclinstid)
+#endif
+            call oclinitmkf(ocl(oclinstid), srcstr, srclen)
+        end subroutine
+
         subroutine oclInit(srcstrp,kstrp)
             integer(8) :: oclinstid
             integer :: srclen, klen
@@ -165,8 +183,6 @@
             oclinstid = 0
 #endif
 
-!            real, dimension(size(array)):: array1d
-!            array1d = reshape(array,shape(array1d))
             sz1d = size(array)*4 ! x4 because real is 4 bytes
             call oclMakeReadBufferPtrC(ocl(oclinstid),buffer, sz1d, array)
         end subroutine
@@ -182,14 +198,7 @@
             oclinstid = 0
 #endif
 
-!            real, dimension(size(array)):: array1d
-!            print *, 'Reshaping array'
-!            array1d = reshape(array,shape(array1d))
-            !sz1d = sz(1)*sz(2)*sz(3) ! 
             sz1d=size(array)*4 ! x4 because real is 4 bytes
-!            real, allocatable, dimension(:) :: ptr
-            !print *, 'sz:', sz
-            !print *, 'sz1d:', sz1d
             call oclMakeReadWriteBufferPtrC(ocl(oclinstid),buffer, sz1d,array)
         end subroutine
         subroutine oclMakeIntArrayReadWriteBuffer(buffer, sz,array)
@@ -204,14 +213,7 @@
             oclinstid = 0
 #endif
 
-!            real, dimension(size(array)):: array1d
-!            print *, 'Reshaping array'
-!            array1d = reshape(array,shape(array1d))
-            !sz1d = sz(1)*sz(2)*sz(3) ! 
             sz1d=size(array)*4 ! x4 because int is 4 bytes
-!            real, allocatable, dimension(:) :: ptr
-            !print *, 'sz:', sz
-            !print *, 'sz1d:', sz1d
             call oclMakeReadWriteBufferPtrC(ocl(oclinstid),buffer, sz1d,array)
         end subroutine
         subroutine oclMakeIntArrayReadBuffer(buffer, sz, array)
@@ -225,21 +227,10 @@
 #else
             oclinstid = 0
 #endif
-
-!            real, dimension(size(array)):: array1d
-!            array1d = reshape(array,shape(array1d))
             sz1d = size(array)*4 ! x4 because integer is 4 bytes
-            !print *, 'sz:', sz
-            !print *, 'sz1d:', sz1d
-            !integer, allocatable, dimension(:) :: ptr
             call oclMakeReadBufferPtrC(ocl(oclinstid),buffer, sz1d, array)
         end subroutine
-!        subroutine oclMakeIntArrayReadWriteBuffer(buffer, sz,ptr)
-!            integer(8):: buffer
-!            integer :: sz
-!            integer, allocatable, dimension(:) :: ptr
-!           call oclMakeReadWriteBufferPtrC(ocl(oclinstid),buffer, sz,ptr)
-!       end subroutine
+
         subroutine oclMakeReadBuffer(buffer, sz)
             integer(8):: buffer
             integer :: sz
@@ -368,10 +359,27 @@
 
             call oclsetintconstargc(ocl(oclinstid),pos,constarg)
         end subroutine
-!        subroutine oclRun(nargs,argtypes,args)
-!            integer :: nargs, argstypes, 
-!            call oclrunc(ocl(oclinstid),nargs,argtypes,args)
-!        end subroutine
+
+        subroutine runOclKernel(kstrp,exectime)
+            ! args
+            character(len=*), intent(in) :: kstrp
+            real(4) :: exectime
+            ! locals
+            integer(8) :: oclinstid
+            integer :: klen
+            character(len=:), allocatable :: kstr
+
+            klen = len(kstrp)
+            allocate(character(len=klen) :: kstr)
+            kstr=kstrp
+
+#ifdef OCL_MULTIPLE_DEVICES
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0
+#endif
+            call runoclkc(ocl(oclinstid),kstr,klen,exectime)
+        end subroutine
 
         subroutine runOcl(global,local,exectime)
             integer :: global, local

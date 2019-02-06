@@ -17,6 +17,7 @@ typedef int64_t* OclWrapperF;
 void oclinitc_(OclWrapperF ocl,const char* source,const char* kernel);
 void oclinitoptsc_(OclWrapperF ocl,const char* source,const char* kernel,const char* kernel_opts);
 void oclinitf_(OclWrapperF ocl,const char* source,int* srclen, const char* kernel, int* klen);
+void oclinitmkf_(OclWrapperF ocl,const char* source,int* srclen); // multi-kernel, add kernel name separately
 void oclinitdevf_(OclWrapperF ocl,const char* source,int* srclen, const char* kernel, int* klen, int* devIdx);
 void oclinitoptsf_(OclWrapperF ocl,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen);
 void oclinitoptsdevf_(OclWrapperF ocl,const char* source,int* srclen,const char* kernel,int* klen,const char* kernel_opts, int* koptslen, int* devIdx);

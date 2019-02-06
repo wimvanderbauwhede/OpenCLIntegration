@@ -110,7 +110,7 @@ def initOcl(*envt):
 
     dev=getOpt('dev','Device','GPU')
     plat=getOpt('plat','Platform','NVIDIA')
-#    print "PLAT:"+plat
+
     if OSX==1:
         plat='Apple'
     if plat=='AMD':      
@@ -127,7 +127,7 @@ def initOcl(*envt):
         if plat != 'Apple':    
             NVIDIA_SDK_PATH=os.environ['NVSDKCUDA_ROOT']
             if os.environ['OPENCL_GPU']!='NVIDIA':
-#                print 'No NVIDIA platform, defaulting to AMD CPU'
+
                 if os.environ['OPENCL_CPU']=='AMD':
                     AMD_SDK_PATH=os.environ['AMDAPPSDKROOT']
                     plat='AMD'
@@ -151,8 +151,7 @@ def initOcl(*envt):
                 else:
                     print 'No OpenCL-capable GPU found'
                     exit
-#        else:
-#            print 'NVIDIA'
+
     env['KERNEL_OPTS']=[]    
     gpu=getOpt('gpu','GPU','-1')
     acc=getOpt('acc','ACC','-1')
@@ -221,8 +220,6 @@ def initOcl(*envt):
         dbgmacro=''
         dbgflag=''
 
-
-
     useF=getOpt('F','Functional',0)
     if 'useF' in env:
         if env['useF']==1:
@@ -253,8 +250,8 @@ def initOcl(*envt):
         defflags=map (lambda s: '-D'+s, deflist)   
 
     DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
-    if plat=='Altera':
-        DEVFLAGS+=['-DFPGA']
+    if plat=='Altera' or plat=='Xilinx':
+        DEVFLAGS+=['-DFPGA','-DMULTI_KERNEL']
     if dev=='CPU':
         dbg_dev=dbgmacro+' '        
     else:    
@@ -288,17 +285,11 @@ def initOcl(*envt):
     env['MACROS'] = DEVFLAGS
     #env.Append(CXXFLAGS = ['-mcmodel=large']
 
-    env.Help(help)
-#if useOclWrapper:
-#env.Append(CPPPATH=[OPENCL_DIR,OPENCL_DIR+'/OpenCLIntegration'])    
+    env.Help(help)  
     env.Append(CPPPATH=[OPENCL_DIR+'/OpenCLIntegration'])    
-#   else:
-#       env.Append(CPPPATH=[OPENCL_DIR])    
+   
     if OSX==1:
         env.Append(FRAMEWORKS=['OpenCL'])
-#        if useDyn=='1' and useF=='1':
-#            env.Append(LIBPATH=['.'])
-#            env.Append(LIBS=['OclWrapper'])
     else:    
         if plat !='Altera':
             env.Append(LIBS=['OpenCL'])
@@ -326,8 +317,6 @@ def initOcl(*envt):
 #export XCL_PLATFORM=xilinx_adm-pcie-7v3_1ddr_1_0   
             env.Append(CPPPATH=map(lambda s: XILINX_SDK_PATH+s, ['/runtime/include/1_2'])) 
             env.Append(LIBPATH=[XILINX_SDK_PATH+'/runtime/lib/x86_64']) 
-            #env.Append(LIBS=['xilinxcl', 'dl', 'acl_emulator_kernel_rt', 'xilinxhalmmd', 'FIXMEnalla_pcie_mmd', 'elf', 'rt', 'stdc++'])
-            #env.Append(CXXFLAGS = ['-fPIC'])
         else: # means NVIDIA
             env.Append(CPPPATH=[NVIDIA_SDK_PATH+'/include',NVIDIA_SDK_PATH+'/OpenCL/common/inc' ,NVIDIA_SDK_PATH+'/OpenCL/common/inc/CL'])
 
@@ -363,7 +352,7 @@ def initOcl(*envt):
             else:    
                 flib = env.Library('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
             fflib = env.Object('oclWrapper.o',OPENCL_DIR+'/OpenCLIntegration/oclWrapper.f95')
-#    else:            
+
     if useOclWrapper:
         if useDyn=='1':
             lib = env.Library('OclWrapper',oclsources)
@@ -379,7 +368,6 @@ def initOcl(*envt):
             env.Append(LIBS=['stdc++'])
             env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
-#    else:
         env.Append(LIBS=['OclWrapper'])
         env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', lib)
         env.Alias('install',OPENCL_DIR+'/OpenCLIntegration/lib', lib)
@@ -392,7 +380,6 @@ def build(appname,sources):
 
 def buildF(env,appname,sources):
     global opts, OPENCL_DIR
-#    VariantDir('.',OPENCL_DIR+'/OpenCLIntegration/')
     env.Program(appname+'_'+dev+'_'+plat+'_'+kernel,sources+['oclWrapper.o'])
 
 
