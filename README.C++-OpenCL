@@ -26,4 +26,3 @@ If you want to use the older C++ API:
 
 then you need to undefine the macro OCLV2
 You can do this with the V=1 option in the SCons script.
-
