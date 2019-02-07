@@ -114,13 +114,9 @@ class OclWrapper {
 		cl::vector<cl::Device> devices;
 #endif
 		cl::Context* context_p;
-#ifndef MULTI_KERNEL
 		cl::Kernel* kernel_p;
 		cl::Kernel kernel;
-#else
-		std::vector<cl::Kernel*> kernel_ps;
-		std::vector<cl::Kernel> kernels;
-#endif
+
 		cl::Program* program_p;
 
 #ifndef OCLV2
@@ -129,13 +125,13 @@ class OclWrapper {
 #else
 		OclKernelFunctor runKernel;
 #endif
-#ifndef MULTI_KERNEL
+//#ifndef MULTI_KERNEL
 		cl::CommandQueue* queue_p;
 		cl::CommandQueue queue;
-#else
-		std::vector<cl::CommandQueue*> queue_ps;
-		std::vector<cl::CommandQueue> queues;
-#endif        
+//#else
+//		std::vector<cl::CommandQueue*> queue_ps;
+//		std::vector<cl::CommandQueue> queues;
+//#endif        
 		cl::Buffer* buf[NBUFS];
 		cl::Buffer* buf_p;
 		int nPlatforms;
@@ -151,7 +147,7 @@ class OclWrapper {
 		OclWrapper ();
 		OclWrapper (int deviceIdx);
 //		OclWrapper ();
-//		OclWrapper (const char* ksource, const char* kname, const char* kopts="");
+		OclWrapper ( const char* kname, int devIdx=-1);
         OclWrapper (const char* ksource, const char* kname, const char* kopts="",int devIdx=-1);
 		void initOclWrapper(const char* ksource, const char* kname, const char* kopts="");
 
@@ -204,6 +200,7 @@ class OclWrapper {
 		void setKernelArg(std::string kname, unsigned int idx, const int buf);
 		void setKernelArg(std::string kname, unsigned int idx, const float buf);
 #endif
+        float enqueueTaskKernel(std::string kname);
 		int enqueueNDRangeOffset(const cl::NDRange& = cl::NDRange(0),const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		int enqueueNDRange(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		int enqueueNDRangeRun(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);

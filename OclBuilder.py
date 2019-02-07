@@ -110,7 +110,7 @@ def initOcl(*envt):
 
     dev=getOpt('dev','Device','GPU')
     plat=getOpt('plat','Platform','NVIDIA')
-
+    binary_ext = 'exe' # Will probably never work
     if OSX==1:
         plat='Apple'
     if plat=='AMD':      
@@ -140,10 +140,12 @@ def initOcl(*envt):
                     ALTERA_SDK_PATH=os.environ['ALTERAOCLSDKROOT']
                     plat='Altera'
                     dev='FPGA'
+                    binary_ext = 'aocx'
                 elif os.environ['OPENCL_ACC']=='Xilinx':
                     XILINX_SDK_PATH=os.environ['SDACCELROOT'] 
                     plat='Xilinx'
                     dev='FPGA'
+                    binary_ext = 'xclbin'
                 elif os.environ['OPENCL_CPU']=='Intel':
                     INTEL_SDK_PATH=os.environ['INTELOCLSDKROOT']
                     plat='Intel'
@@ -249,7 +251,8 @@ def initOcl(*envt):
         deflist=defs.split(',')
         defflags=map (lambda s: '-D'+s, deflist)   
 
-    DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
+    DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag,
+    memreadflag,devinfoflag,platinfoflag,multimacro]+defflags+['-DBIN_EXT='+'\\"'+binary_ext+'\\"']
     if plat=='Altera' or plat=='Xilinx':
         DEVFLAGS+=['-DFPGA','-DMULTI_KERNEL']
     if dev=='CPU':

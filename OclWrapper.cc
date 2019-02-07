@@ -70,9 +70,6 @@ nPlatforms(0), ncalls(0) {
 	    // First check the Platform
 		cl::Platform::get(&platformList);
 		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
-#ifdef VERBOSE
-//		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
-#endif
 		nPlatforms=platformList.size();
 #ifdef PLATINFO
 		for (unsigned int i=0;i<platformList.size();i++) {
@@ -92,9 +89,7 @@ nPlatforms(0), ncalls(0) {
 		selectDevice(devIdx);
         }
 #endif        
-//        std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
         
-//		loadKernel( ksource,  kname, kopts);
 #ifndef FPGA        
 	if (strcmp(kopts,"")==0) {
 		 std::string stlstr=kernelOpts.str();
@@ -106,19 +101,19 @@ nPlatforms(0), ncalls(0) {
 		loadKernel( ksource,  kname, kopts);
 	}
 #else
-    // For the FPGA we need to see if there is an aocx file and load it
+    // For the FPGA we need to see if there is an bin file and load it
     std::string cl_file(ksource);
-    std::string file_name = cl_file.substr(0,cl_file.size()-3); // FIXME: make it work with any extension!
-    std::string aocx_file = file_name+".aocx";
+    std::string file_name = cl_file.substr(0,cl_file.size()-3); // this removes the .cl extension
+    std::string bin_file = file_name+"."+BIN_EXT;
 #ifdef VERBOSE
-    std::cout <<"Looking for "<<aocx_file <<" for " << ksource<<"\n";
+    std::cout <<"Looking for "<<bin_file <<" for " << ksource<<"\n";
 #endif    
-    const char* aocx_file_str = aocx_file.c_str();
-    if(access( aocx_file_str, F_OK ) != -1 ) {
-    loadBinary(aocx_file_str);
-    loadKernel(kname);
+    const char* bin_file_str = bin_file.c_str();
+    if(access( bin_file_str, F_OK ) != -1 ) {
+        loadBinary(bin_file_str);
+        loadKernel(kname);
     } else {
-        std::cerr << "Could not find "<<aocx_file<<"\n";
+        std::cerr << "Could not find "<<bin_file<<"\n";
         exit(0);
     }
 #endif    
@@ -186,19 +181,19 @@ nPlatforms(0), ncalls(0) {
 	}
 */
 #else
-    // For the FPGA we need to see if there is an aocx file and load it
+    // For the FPGA we need to see if there is an bin file and load it
     std::string cl_file(ksource);
     std::string file_name = cl_file.substr(0,cl_file.size()-3); // FIXME: make it work with any extension!
-    std::string aocx_file = file_name+".aocx";
+    std::string bin_file = file_name+".bin";
 #ifdef VERBOSE
-    std::cout <<"Looking for "<<aocx_file <<" for " << ksource<<"\n";
+    std::cout <<"Looking for "<<bin_file <<" for " << ksource<<"\n";
 #endif
-    const char* aocx_file_str = aocx_file.c_str();
-    if(access( aocx_file_str, F_OK ) != -1 ) {
-    	loadBinary(aocx_file_str);
+    const char* bin_file_str = bin_file.c_str();
+    if(access( bin_file_str, F_OK ) != -1 ) {
+    	loadBinary(bin_file_str);
     //loadKernel(kname);
     } else {
-        std::cerr << "Could not find "<<aocx_file<<"\n";
+        std::cerr << "Could not find "<<bin_file<<"\n";
         exit(0);
     }
 #endif
@@ -491,7 +486,6 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
 // ---------------------------------------------------------------------
 // This loads a binary, turns it into a cl::Program and builds it
 void OclWrapper::loadBinary(const char* ksource) {
- //    std::cout <<"\n\nEntered loadBinary("<< ksource <<")\n";
 
     std::ifstream binfile(ksource);
     checkErr(binfile.is_open() ? CL_SUCCESS:-1, ksource);
@@ -502,7 +496,6 @@ void OclWrapper::loadBinary(const char* ksource) {
             );
 
     cl::Program::Binaries binaries(1, std::make_pair((void*)prog.c_str(), prog.length())); // WV: the original code had prog.length()+1
-// std::cout <<"Binary size: "<< prog.length()<<"\n";
 #ifdef OCLV2
     std::vector<cl_int> binaryStatus;
 #else
@@ -517,8 +510,6 @@ void OclWrapper::loadBinary(const char* ksource) {
     err_str+=")";
     const char* err_cstr =  err_str.c_str();
     checkErr(err, err_cstr );
-
-//    std::cout <<"Left loadBinary("<< ksource <<") with status "<< ((binaryStatus[0] == CL_SUCCESS) ? "SUCCESS" : "CL_INVALID_BINARY") <<"\n";
 
 }
 // ---------------------------------------------------------------------
@@ -571,7 +562,7 @@ void OclWrapper::loadKernel(const char* kname) {
     kernel = *kernel_p;
 #ifdef MULTI_KERNEL
     std::string knamestr(kname);
-    kernels_map.insert(knamestr,kernel_p);
+    kernels_map.insert({knamestr,kernel_p});
 #endif
     checkErr(err, "Kernel::Kernel()");
 }
@@ -589,7 +580,7 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname) {
     kernel = *kernel_p;
 #ifdef MULTI_KERNEL
     std::string knamestr(kname);
-    kernels_map.insert(knamestr,kernel_p);
+    kernels_map.insert({knamestr,kernel_p});
 #endif
     checkErr(err, "Kernel::Kernel()");
 }
@@ -601,7 +592,7 @@ void OclWrapper::loadKernel(const char* ksource, const char* kname,const char* o
     kernel = *kernel_p;
 #ifdef MULTI_KERNEL
     std::string knamestr(kname);
-    kernels_map.insert(knamestr,kernel_p);
+    kernels_map.insert({knamestr,kernel_p});
 #endif
     std::string err_str("loadKernel::Kernel(");
     err_str+=kname;
@@ -772,6 +763,7 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
     return kernel_exec_time;
 }
 
+#ifdef MULTI_KERNEL
 float OclWrapper::enqueueTaskKernel(std::string kname) {
 	// Create the CommandQueue
     if ((void*)queue_p==NULL) {
@@ -784,45 +776,14 @@ float OclWrapper::enqueueTaskKernel(std::string kname) {
 	ncalls++;
 	cl::Event event;
 	cl::Kernel* kernel_p = kernels_map.at(kname);
-	err = queue_p->enqueueTask(kernel_p, NULL, &event);
+	err = queue_p->enqueueTask(*kernel_p, NULL, &event);
 
 /*
-    bool zeroGlobalRange = (globalRange==0) ? true : false;
-    bool zeroLocalRange = (localRange == 0) ? true : false;
-
-    if (zeroLocalRange) {
-	    if (zeroGlobalRange) {
-		    std::cerr << "WARNING: GlobalRange is 0!\n";
-		    err = queue_p->enqueueNDRangeKernel(
+     err = queue_p->enqueueNDRangeKernel(
 				    *kernel_p,
 				    cl::NullRange,
-				    cl::NullRange,cl::NullRange,
+				    cl::NDRange(1),cl::NDRange(1),
 				    NULL,&event);
-	    } else {
-		    err = queue_p->enqueueNDRangeKernel(
-				    *kernel_p,
-				    cl::NullRange,
-				    //*globalRange,*localRange,
-				    cl::NDRange(globalRange),cl::NullRange,
-				    NULL,&event);
-	    }
-    } else {
-	    if (zeroGlobalRange) {
-		    std::cerr << "WARNING: GlobalRange is 0!\n";
-		    err = queue_p->enqueueNDRangeKernel(
-				    *kernel_p,
-				    cl::NullRange,
-				    cl::NullRange,cl::NDRange(localRange),
-				    NULL,&event);
-	    } else {
-		    err = queue_p->enqueueNDRangeKernel(
-				    *kernel_p,
-				    cl::NullRange,
-				    //*globalRange,*localRange,
-				    cl::NDRange(globalRange),cl::NDRange(localRange),
-				    NULL,&event);
-	    }
-    }
 */
 	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
 #ifdef OPENCL_TIMINGS
@@ -832,7 +793,7 @@ float OclWrapper::enqueueTaskKernel(std::string kname) {
 #endif
     return kernel_exec_time;
 }
-
+#endif
 
 
 
