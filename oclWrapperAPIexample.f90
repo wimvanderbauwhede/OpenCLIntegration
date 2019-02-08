@@ -46,11 +46,13 @@ program oclWrapperAPIexample
 
     ! Launch the kernels
 
-    call runOclKernel(kernel1, exectimes(1))
-    call runOclKernel(kernel2, exectimes(2))
-    call runOclKernel(kernel3, exectimes(3))
-    call runOclKernel(kernel4, exectimes(4))
-    call runOclKernel(kernel5, exectimes(5))
+    call runOclTask(kernel1, exectimes(1))
+    call runOclTask(kernel2, exectimes(2))
+    call runOclTask(kernel3, exectimes(3))
+    call runOclTask(kernel4, exectimes(4))
+    call runOclTask(kernel5, exectimes(5))
+
+    call oclWait(kernel5)
 
     ! Read data from FPGA memory
     call oclRead1DFloatArrayBuffer(eta_out_buf, eta_sz,eta)

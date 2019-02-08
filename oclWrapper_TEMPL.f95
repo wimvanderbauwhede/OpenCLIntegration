@@ -359,7 +359,7 @@
             call oclsetintconstargc(ocl(oclinstid),pos,constarg)
         end subroutine
 
-        subroutine runOclKernel(kstrp,exectime)
+        subroutine runOclTask(kstrp,exectime)
             ! args
             character(len=*), intent(in) :: kstrp
             real(4) :: exectime
@@ -380,6 +380,26 @@
             call runoclkc(ocl(oclinstid),kstr,klen,exectime)
         end subroutine
 
+        subroutine oclWaitForTask(kstrp)
+            ! args
+            character(len=*), intent(in) :: kstrp
+            real(4) :: exectime
+            ! locals
+            integer(8) :: oclinstid
+            integer :: klen
+            character(len=:), allocatable :: kstr
+
+            klen = len(kstrp)
+            allocate(character(len=klen) :: kstr)
+            kstr=kstrp
+ 
+#ifdef OCL_MULTIPLE_DEVICES
+           call oclgetinstancec(oclinstmap, oclinstid)
+#else
+            oclinstid = 0
+#endif
+           call oclwaitc(ocl(oclinstid),kstr,klen) 
+        end subroutine
         subroutine runOcl(global,local,exectime)
             integer :: global, local
             integer(8) :: oclinstid

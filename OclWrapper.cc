@@ -774,9 +774,10 @@ float OclWrapper::enqueueTaskKernel(std::string kname) {
             checkErr(err, "CommandQueue::CommandQueue()");
     }
 	ncalls++;
-	cl::Event event;
+//	cl::Event event;
 	cl::Kernel* kernel_p = kernels_map.at(kname);
-	err = queue_p->enqueueTask(*kernel_p, NULL, &event);
+    cl::Event end_task_event = task_events_map.at(taskname);
+	err = queue_p->enqueueTask(*kernel_p, NULL, &end_task_event);
 
 /*
      err = queue_p->enqueueNDRangeKernel(
@@ -785,13 +786,18 @@ float OclWrapper::enqueueTaskKernel(std::string kname) {
 				    cl::NDRange(1),cl::NDRange(1),
 				    NULL,&event);
 */
-	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+	//event.wait(); 
 #ifdef OPENCL_TIMINGS
-	float kernel_exec_time=getExecutionTime(event);
+	float kernel_exec_time=getExecutionTime(end_task_event);
 #else
 	float kernel_exec_time=(float)ncalls;
 #endif
     return kernel_exec_time;
+}
+
+void OclWrapper::waitForTask(std::string taskname) {
+    cl::Event end_task_event = task_events_map.at(taskname);
+    end_task_event.wait(end_task_event);
 }
 #endif
 

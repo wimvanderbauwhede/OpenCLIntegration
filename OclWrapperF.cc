@@ -210,6 +210,18 @@ void runoclkc_(OclWrapperF ocl_ivp,const char* kernel, int* klen, float* ext_tim
     *ext_time = ocl->enqueueTaskKernel(kstr);
 };
 
+void oclwaitc_(OclWrapperF ocl_ivp, const char* kernel, int* klen) {
+	OclWrapper* ocl = fromWord<OclWrapper*>(*ocl_ivp);
+	std::string kstr(kernel);
+	kstr = kstr.substr(0,*klen);
+	kernel=kstr.c_str();
+    
+	OclWrapper* ocl = fromWord<OclWrapper*>(*ocl_ivp);
+
+    *ext_time = ocl->waitForTask(kstr);
+};
+
+
 
 void runoclc2d_(OclWrapperF ocl_ivp,int* global , int* local, float* ext_time) {
 	OclWrapper* ocl = fromWord<OclWrapper*>(*ocl_ivp);

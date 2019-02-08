@@ -46,6 +46,10 @@ void oclrunc_(OclWrapperF ocl,int* nargs,int64_t argtypes, int64_t* args);
 void runoclc_(OclWrapperF ocl,int* global , int* local, float* exectime);
 void runoclc2d_(OclWrapperF ocl,int* global , int* local, float* exectime);
 void runoclc3d_(OclWrapperF ocl,int* global , int* local, float* exectime);
+
+void runoclkc_(OclWrapperF ocl,const char* kernel, int* klen, float* ext_time);
+void oclwaitc_();
+
 #ifdef OCL_MULTIPLE_DEVICES
 void oclsetinstancec_(int64_t* ivp_oclinstmap, int64_t* ivp_oclinstid );
 void oclgetinstancec_(int64_t* ivp_oclinstmap, int64_t* ivp_oclinstid );

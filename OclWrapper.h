@@ -87,6 +87,8 @@ class OclWrapper {
 		std::string kernelsource; // This is UNUSED!
 #ifdef MULTI_KERNEL
 		std::unordered_map<std::string,cl::Kernel*> kernels_map;
+		std::unordered_map<std::string,cl::Event> task_events_map;
+        cl::Event end_task_event;
 #endif
 #ifdef OCLV2
 		std::vector<cl::Platform> platformList;
@@ -245,6 +247,11 @@ class OclWrapper {
 				const VECTOR_CLASS<cl::Event> * events = NULL,
 				cl::Event * event = NULL);
 		void writeBufferPos(int argpos, int bufSize, void* hostBuf);
+
+#ifdef MULTI_KERNEL
+        void waitForTask(std::string taskname);
+#endif
+        
 #ifdef OPENCL_TIMINGS
 		double getExecutionTime (const cl::Event& event);
 #endif
