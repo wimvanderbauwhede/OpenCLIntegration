@@ -97,17 +97,28 @@ class OclWrapper {
 		cl::vector<cl::Device> devices;
 #endif
 		cl::Context* context_p;
+#ifndef FPGA_MULTI_KERNEL
 		cl::Kernel* kernel_p;
 		cl::Kernel kernel;
+#else
+		std::vector<cl::Kernel*> kernel_ps;
+		std::vector<cl::Kernel> kernels;
+#endif
 		cl::Program* program_p;
+
 #ifndef OCLV2
 		cl::KernelFunctor runKernel;
 		cl::KernelFunctor kernel_functor;
 #else
 		OclKernelFunctor runKernel;
 #endif
+#ifndef FPGA_MULTI_KERNEL        
 		cl::CommandQueue* queue_p;
 		cl::CommandQueue queue;
+#else
+		std::vector<cl::CommandQueue*> queue_ps;
+		std::vector<cl::CommandQueue> queues;
+#endif        
 		cl::Buffer* buf[NBUFS];
 		cl::Buffer* buf_p;
 		int nPlatforms;
