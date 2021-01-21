@@ -30,7 +30,7 @@ export OPENCL_GPU=`$OPENCL_DIR/OpenCLIntegration/bin/test_gpu.pl`
 export OPENCL_CPU=`$OPENCL_DIR/OpenCLIntegration/bin/test_cpu.pl`
 export OPENCL_ACC=`$OPENCL_DIR/OpenCLIntegration/bin/test_acc.pl`
 
-export PYTHONPATH=$PYTHONPATH:$OPENCL_DIR/OpenCLIntegration
+export PYTHONPATH=$PYTHONPATH:$OPENCL_DIR/OpenCLIntegration/
 export PATH=$OPENCL_DIR/OpenCLIntegration/bin:$PATH
 
 

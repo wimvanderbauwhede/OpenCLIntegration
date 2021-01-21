@@ -133,7 +133,7 @@ class OclWrapper {
 		std::ostringstream kernelOpts;		
 		OclWrapper ();
 		OclWrapper (int deviceIdx);
-//		OclWrapper ();
+		OclWrapper (int deviceIdx, int platformIdx);
 //		OclWrapper (const char* ksource, const char* kname, const char* kopts="");
         OclWrapper (const char* ksource, const char* kname, const char* kopts="",int devIdx=-1);
 		void initOclWrapper(const char* ksource, const char* kname, const char* kopts="");

@@ -207,29 +207,63 @@ useACC(false),
 			platformInfo.show(platformList,i);
 		}
 #endif
-
+std::cout << "\nselectDevice ...\n";
 		selectDevice(devIdx);
+std::cout << "\nselectDevice DONE\n";		
 		createQueue();
+		std::cout << "\ncreateQueue DONE\n";
         initArgStatus();
+		std::cout << "Constructor DONE\n";
     };
 
-//OclWrapper::OclWrapper () : nPlatforms(0) {
-//	    // First check the Platform
-//		cl::Platform::get(&platformList);
-//		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
-//#ifdef VERBOSE
-//		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
-//#endif
-//		nPlatforms=platformList.size();
-//#ifdef PLATINFO
-//		for (unsigned int i=0;i<platformList.size();i++) {
-//			std::cout << "Platform["<< i << "]\n";
-//			platformInfo.show(platformList,i);
-//		}
-//#endif
-//        initArgStatus();
-//
-//   }
+OclWrapper::OclWrapper (int devIdx, int platIdx) :
+#ifdef DEV_GPU
+useCPU(false),
+useGPU(true),
+useACC(false),
+#else
+#ifdef DEV_ACC
+useCPU(false),
+useGPU(false),
+useACC(true),
+#else
+useCPU(true),
+useGPU(false),
+useACC(false),
+#endif
+#endif
+		nPlatforms(0) {
+
+	    // First check the Platform
+		cl::Platform::get(&platformList);
+		checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
+#ifdef VERBOSE
+		std::cerr << "Number of platforms is: " << platformList.size() << std::endl;
+#endif
+		nPlatforms=platformList.size();
+#ifdef PLATINFO
+		for (unsigned int i=0;i<platformList.size();i++) {
+			platformInfo.show(platformList,i);
+		}
+#endif
+std::cout << "\nselectDevice ...\n";
+		selectDevice(platIdx, devIdx,  
+#ifdef DEV_GPU
+GPU
+#else
+#ifdef DEV_ACC
+ACC
+#else
+CPU
+#endif
+#endif				
+		);
+std::cout << "\nselectDevice DONE\n";		
+		createQueue();
+		std::cout << "\ncreateQueue DONE\n";
+        initArgStatus();
+		std::cout << "Constructor DONE\n";
+    };
 // ----------------------------------------------------------------------------------------
 // Other public methods
 // ----------------------------------------------------------------------------------------
@@ -331,6 +365,7 @@ void OclWrapper::selectDevice(int pIdx, int dIdx, DeviceType devt) {
 	};
 	getContextAndDevices();
 #ifdef DEVINFO
+std::cout <<"\nDEVINFO for device "<<deviceIdx << " on platform " << platformIdx<< "\n";
     deviceInfo.show(devices[deviceIdx]);
 #endif
 }

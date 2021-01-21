@@ -6,7 +6,8 @@
 
 import os
 import re
-import commands
+# import commands
+import subprocess
 import sys
 import os.path
 from SCons.Variables import Variables
@@ -17,15 +18,15 @@ def getOpt(optname,desc,default):
 
     global opts
     opts.Add(optname,desc,default)
-    optionl = filter (lambda x: x.key==optname,opts.options)
+    optionl = list(filter (lambda x: x.key==optname,opts.options))
     if optionl:
         option=optionl[0]
-        if opts.args.has_key(optname) and opts.args[optname]!=option.default:
+        if optname in opts.args and opts.args[optname]!=option.default:
             return opts.args[option.key]
         else: 
             return option.default
     else:
-        print "No such option: "+optname
+        print( "No such option: "+optname )
     
 def initOcl(*envt):
     if envt==():
@@ -81,7 +82,7 @@ def initOcl(*envt):
     The macros controlled by the other options are listed on the right
     The directory for the OclWrapper can be accessed via OclBuilder.OPENCL_DIR
 
-    The following environment variables must be set (see OPENCL_DIR/OpenCLIntegration/ocl_env.sh):
+    The following environment variables must be set (see OPENCL_DIR/ocl_env.sh):
 
     """ + envs
 
@@ -89,7 +90,8 @@ def initOcl(*envt):
     if not 'useOclWrapper' in globals():    
         useOclWrapper = True
  
-    if commands.getoutput("uname") == "Darwin":
+    # if commands.getoutput("uname") == "Darwin":
+    if subprocess.check_output(['uname',''], shell=True).strip()  == "Darwin":
         OSX=1
         OSFLAG='-DOSX'
     else:
@@ -149,7 +151,7 @@ def initOcl(*envt):
                     plat='Intel'
                     dev='CPU'
                 else:
-                    print 'No OpenCL-capable GPU found'
+                    print( 'No OpenCL-capable GPU found' )
                     exit
 #        else:
 #            print 'NVIDIA'
@@ -261,15 +263,16 @@ def initOcl(*envt):
         dbg_dev=''
     kernel_opts='\\"'+kopts+' -DEXT_DEFS '+dbg_dev+(' '.join(env['KERNEL_OPTS']))+'\\"'
     KERNEL_OPTS=['-DKERNEL_OPTS='+kernel_opts+''] 
-    if commands.getoutput("uname") == "Darwin":
+    # if commands.getoutput("uname") == "Darwin":
+    if subprocess.check_output(['uname',''], shell=True).strip()  == "Darwin":
         DEVFLAGS+=['-DOSX']    
     if useOclWrapper:    
-        oclsources=map (lambda s: OPENCL_DIR+'/OpenCLIntegration/'+s, ['Timing.cc','DeviceInfo.cc','PlatformInfo.cc','OclWrapper.cc'])
+        oclsources= list(map (lambda s: OPENCL_DIR+'/OpenCLIntegration/'+s, ['Timing.cc','DeviceInfo.cc','PlatformInfo.cc','OclWrapper.cc']))
         env['OCLSOURCES']=oclsources
     if plat=='Altera':
         oclsources+=[OPENCL_DIR+'/OpenCLIntegration/libstdcxx-compatibility.cpp']
     if OSX==1 and 'ROOTSYS' in os.environ:
-        print 'Setting CXX to g++-4.2 for CERN ROOT on OS X'
+        print( 'Setting CXX to g++-4.2 for CERN ROOT on OS X' )
         env['CXX'] = ['g++-4.2'] # FIXME: because any higher g++ results in ERROR: malloc: *** error for object 0x7fff7064c500: pointer being freed was not allocated
     elif 'CXX_COMPILER' in os.environ:
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
