@@ -34,7 +34,7 @@ def initOcl(*envt):
     else:
         env=envt[0]
 
-    global opts,dev,plat,multi,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper, sel
+    global opts,dev,plat,sdk, devidx,platidx,multi,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper, sel
 
     OPENCL_DIR=os.environ['OPENCL_DIR']
     
@@ -110,14 +110,19 @@ def initOcl(*envt):
     if oclwrapper != '1':
         useOclWrapper = False
 
+    devidx=getOpt('devidx','Device Index','-1')
+    platidx=getOpt('platidx','Platform Index','-1')
+    
     dev=getOpt('dev','Device','GPU')
     plat=getOpt('plat','Platform','NVIDIA')
+    sdk=getOpt('sdk','Platform SDK','NVIDIA')
 #    print "PLAT:"+plat
     if OSX==1:
         plat='Apple'
-    if plat=='AMD':      
+        sdk='Apple'
+    if plat=='AMD' or sdk=='AMD':      
         AMD_SDK_PATH=os.environ['AMDAPPSDKROOT']
-    elif plat=='Intel':      
+    elif plat=='Intel' or sdk=='Intel':      
         INTEL_SDK_PATH=os.environ['INTELOCLSDKROOT']
     elif plat=='MIC':      
         INTEL_SDK_PATH=os.environ['INTELOCLSDKROOT']
@@ -159,14 +164,18 @@ def initOcl(*envt):
     gpu=getOpt('gpu','GPU','-1')
     acc=getOpt('acc','ACC','-1')
     devidxflag='-DDEVIDX=-1'
+    platidxflag='-DPLATIDX=-1'
     if gpu!='-1':
         devidxflag='-DDEVIDX='+gpu
         dev='GPU'    
-
     if acc!='-1':
         devidxflag='-DDEVIDX='+acc
         dev='ACC'
-        
+    if devidx!='-1':
+        devidxflag='-DDEVIDX='+devidx
+    if platidx!='-1':
+        platidxflag='-DPLATIDX='+platidx
+    
     kernel=getOpt('kernel','KERNEL','1')
     sel=getOpt('sel','SELECT','1')
     nth=getOpt('nth','#threads','1')
@@ -254,7 +263,7 @@ def initOcl(*envt):
         deflist=defs.split(',')
         defflags=map (lambda s: '-D'+s, deflist)   
 
-    DEVFLAGS=['-DDEV_'+dev,devidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
+    DEVFLAGS=['-DDEV_'+dev,devidxflag,platidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
     if plat=='Altera':
         DEVFLAGS+=['-DFPGA']
     if dev=='CPU':
@@ -278,15 +287,14 @@ def initOcl(*envt):
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
-    if True or plat!='Altera':
-        #if ('GCXX' in  os.environ and  os.environ['CXX'] ==  os.environ['GCXX']): # and int(os.environ['GCXX_VERSION'])<480):
-        if ('GCXX' in  os.environ and  os.environ['CXX'] ==  os.environ['GCXX'] and int(os.environ['GCXX_VERSION'])<480):
-            print('OLD GCXX: '+os.environ['GCXX_VERSION'])
-            env.Append(CXXFLAGS = ['-std=c++0x','-m64','-fPIC','-DOLD_CXX',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
-        else:
-            env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
-    else:    
-        env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+    # if True or plat!='Altera':
+    if ('GCXX' in  os.environ and  os.environ['CXX'] ==  os.environ['GCXX'] and int(os.environ['GCXX_VERSION'])<480):
+        print('OLD GCXX: '+os.environ['GCXX_VERSION'])
+        env.Append(CXXFLAGS = ['-std=c++0x','-m64','-fPIC','-DOLD_CXX',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+    else:
+        env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
+    # else:    
+    #     env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
     env['MACROS'] = DEVFLAGS
     #env.Append(CXXFLAGS = ['-mcmodel=large']

@@ -5,7 +5,7 @@ export OPENCL_DIR= $HOME/OpenCL
 
 # OpenCL SDK paths
 # NVIDIA
-export NVSDKCUDA_ROOT="/Developer/GPU\ Computing/"
+export NVSDKCUDA_ROOT="/usr/local/cuda-11.1/targets/x86_64-linux/"
 # AMD
 export AMDAPPSDKROOT=/usr/local/AMD-APP-SDK-v2.4-lnx64
 # Intel
