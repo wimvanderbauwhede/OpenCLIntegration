@@ -798,7 +798,19 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 	runKernel=kernel_p->bind(*queue_p,globalRange, localRange);
 	kernel_functor=runKernel;
 #else
+#ifndef OCLV22
 	runKernel=bindKernel(*kernel_p,*queue_p,globalRange, localRange);
+#else
+	// runKernel=kernel_p->bind(*queue_p,globalRange, localRange);
+	#error "NEEDS TOTAL REWORK!"
+    // runKernel =
+    //     cl::KernelFunctor<>(*program_p, "updateGlobal");
+    // runKernel(
+    //     cl::EnqueueArgs(
+    //     globalRange, localRange)
+	// );
+
+#endif	
 #endif	
 	return ncalls;
 }

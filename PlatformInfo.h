@@ -9,7 +9,11 @@
 //#include "CL/cl.hpp"
 #ifdef OCLV2
 #include <vector>
+#ifdef OCLV22
+#include <CL/cl2.hpp>
+#else
 #include <CL/cl.hpp>
+#endif
 #else
 #define __NO_STD_VECTOR
 #ifndef FPGA

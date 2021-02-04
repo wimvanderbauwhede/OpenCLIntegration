@@ -224,7 +224,7 @@ def initOcl(*envt):
     verflag=''
     if version=='1.2':
         verflag='-DOCLV2'
-
+    ver2flag='-DOCLV22'
     dbg=getOpt('dbg','Debug','0')    
     dbgflag='-g'
     dbgmacro='-DOCLDBG=1'
@@ -263,7 +263,8 @@ def initOcl(*envt):
         deflist=defs.split(',')
         defflags=map (lambda s: '-D'+s, deflist)   
 
-    DEVFLAGS=['-DDEV_'+dev,devidxflag,platidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
+    tgtver = '-DCL_HPP_TARGET_OPENCL_VERSION=210'
+    DEVFLAGS=['-DDEV_'+dev,devidxflag,platidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, ver2flag, tgtver, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
     if plat=='Altera':
         DEVFLAGS+=['-DFPGA']
     if dev=='CPU':

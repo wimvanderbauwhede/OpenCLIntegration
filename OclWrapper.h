@@ -22,9 +22,15 @@
 #else
 // Not OS X, i.e. Linux
 #ifdef OCLV2
+#ifdef OCLV22
+#include <CL/cl2.hpp>
+#else
 #include <CL/cl.hpp>
+#endif
+#ifndef OCLV22
 // OpenCL v1.2
 #include <OclKernelFunctor.h>
+#endif
 #else
 #ifndef FPGA
 #include <cl.hpp>
@@ -110,7 +116,11 @@ class OclWrapper {
 		cl::KernelFunctor runKernel;
 		cl::KernelFunctor kernel_functor;
 #else
+#ifdef OCLV22
+		cl::KernelFunctor runKernel;
+#else
 		OclKernelFunctor runKernel;
+#endif
 #endif
 #ifndef FPGA_MULTI_KERNEL        
 		cl::CommandQueue* queue_p;

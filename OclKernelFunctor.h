@@ -5,7 +5,12 @@
 #include <cl.hpp>
 #else
 #ifdef OCLV2
+#ifdef OCLV22
+#define VECTOR_CLASS vector
+#include <CL/cl2.hpp>
+#else
 #include <CL/cl.hpp>
+#endif
 #else
 #include <cl.hpp>
 #endif
