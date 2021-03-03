@@ -207,7 +207,7 @@ useACC(false),
 			platformInfo.show(platformList,i);
 		}
 #endif
-std::cout << "\nselectDevice ...\n";
+std::cout << "\nselectDevice by devIdx ...\n";
 		selectDevice(devIdx);
 std::cout << "\nselectDevice DONE\n";		
 		createQueue();
@@ -246,7 +246,8 @@ useACC(false),
 			platformInfo.show(platformList,i);
 		}
 #endif
-std::cout << "\nselectDevice ...\n";
+
+std::cout << "\nselectDevice by platIdx "<<platIdx<< " and devIdx "<< devIdx << "  ...\n";
 		selectDevice(platIdx, devIdx,  
 #ifdef DEV_GPU
 GPU
@@ -658,17 +659,8 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
 	ncalls++;
 // VERBOSE
 	//std::cout << "# kernel calls: "<<ncalls <<std::endl;
-	//cl::Event* event = new cl::Event;
 	cl::Event event; 
-//	std::cout << "ocl:"<<this<<"\n";
-//    std::cout << "queue_p:"<<queue_p<<"\n";
-//    std::cout << "kernel_p:"<<kernel_p<<"\n";
-//    std::cout << "FIXME! enqueueNDRangeKernel is commented out!\n";
-    // the kernel can be queried successfully ...
 #ifdef VERBOSE
-    // When calling from Fortran, the next line gives the error:
-    // mataccF(3498,0x7fff70c14cc0) malloc: *** error for object 0x1000d1840: pointer being freed was not allocated
-    // *** set a breakpoint in malloc_error_break to debug
     //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
     //std::cout << infostr <<"\n";
 #endif // VERBOSE
@@ -716,19 +708,8 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
             checkErr(err, "CommandQueue::CommandQueue()");
     }
 	ncalls++;
-// VERBOSE
-//	std::cout << "# kernel calls: "<<ncalls <<std::endl;
-	//cl::Event* event = new cl::Event;
 	cl::Event event; 
-//	std::cout << "ocl:"<<this<<"\n";
-//    std::cout << "queue_p:"<<queue_p<<"\n";
-//    std::cout << "kernel_p:"<<kernel_p<<"\n";
-//    std::cout << "FIXME! enqueueNDRangeKernel is commented out!\n";
-    // the kernel can be queried successfully ...
 #ifdef VERBOSE
-    // When calling from Fortran, the next line gives the error:
-    // mataccF(3498,0x7fff70c14cc0) malloc: *** error for object 0x1000d1840: pointer being freed was not allocated
-    // *** set a breakpoint in malloc_error_break to debug
     //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
     //std::cout << infostr <<"\n";
 #endif // VERBOSE
@@ -802,7 +783,7 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 	runKernel=bindKernel(*kernel_p,*queue_p,globalRange, localRange);
 #else
 	// runKernel=kernel_p->bind(*queue_p,globalRange, localRange);
-	#error "NEEDS TOTAL REWORK!"
+	#error "TODO: FIXME: NEEDS TOTAL REWORK!"
     // runKernel =
     //     cl::KernelFunctor<>(*program_p, "updateGlobal");
     // runKernel(

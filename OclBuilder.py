@@ -175,7 +175,7 @@ def initOcl(*envt):
         devidxflag='-DDEVIDX='+devidx
     if platidx!='-1':
         platidxflag='-DPLATIDX='+platidx
-    
+    print(platidxflag)
     kernel=getOpt('kernel','KERNEL','1')
     sel=getOpt('sel','SELECT','1')
     nth=getOpt('nth','#threads','1')
@@ -220,11 +220,11 @@ def initOcl(*envt):
     if warnings=='0':
         vflag=''
 
-    version=getOpt('V','Version','1.2') # FIXME! V1.2 is broken on most platforms
+    version=getOpt('V','Version','1.2') 
     verflag=''
     if version=='1.2':
         verflag='-DOCLV2'
-    ver2flag='-DOCLV22'
+    ver2flag='' #'-DOCLV22'
     dbg=getOpt('dbg','Debug','0')    
     dbgflag='-g'
     dbgmacro='-DOCLDBG=1'
