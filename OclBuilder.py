@@ -1,12 +1,29 @@
 #
 # SCons build script for building OpenCL applications using OclWrapper
 #
-# (c) 2011 Wim Vanderbauwhede <wim.vanderbauwhede@gmail.com>
+# (c) 2011-now Wim Vanderbauwhede <wim.vanderbauwhede@mail.be>
 #
+
+"""
+`plat` or `sdk` (AMD|NVIDIA|Intel|Xilinx) is used to identify where the libraries and header files for the platform are to be found.
+`dev` (CPU, GPU, ACC) sets a macro "DEV_$dev" in the build system
+`platidx` and `devidx` allow to provide the actual indices. This does not override dev, and currently there are no checks
+`gpu` is the devidx for a GPU platform
+`cpu` is the devidx for a CPU platform
+`acc` is the devidx for an ACC platform
+
+If the platidx is not known, we can try and guess it from the $plat value. We should report if that failed.
+The logic is
+- If it is NVIDIA, it is a GPU
+- If it is Intel, it is either a GPU or a CPU (forget MIC or FPGA), so look at $dev
+- If it is AMD, it is either a GPU or a CPU, so look at $dev
+- If it is Xilinx, it must be an FPGA
+"""
+
 
 import os
 import re
-# import commands
+# import commands # OBSOLETE
 import subprocess
 import sys
 import os.path
@@ -47,6 +64,9 @@ def initOcl(*envt):
     *mcm=s|m|l [s] mcmodel flag for gcc/gfortran
     *plat=AMD|NVIDIA|Intel|Altera|Xilinx|MIC [NVIDIA]
     *dev=CPU|GPU|ACC|FPGA [GPU] device
+    *devidx=device index as reported by `clinfo -l`
+    *platidx=platform index as reported by `clinfo -l`
+     cpu=-1|0|1 [-1, means automatic selection]
      gpu=-1|0|1 [-1, means automatic selection]
      acc=-1|0|1 [-1, means automatic selection]
      O=[gcc -O flag] [3]
@@ -116,7 +136,7 @@ def initOcl(*envt):
     dev=getOpt('dev','Device','GPU')
     plat=getOpt('plat','Platform','NVIDIA')
     sdk=getOpt('sdk','Platform SDK','NVIDIA')
-#    print "PLAT:"+plat
+#    print( "PLAT:"+plat)
     if OSX==1:
         plat='Apple'
         sdk='Apple'
@@ -161,10 +181,14 @@ def initOcl(*envt):
 #        else:
 #            print 'NVIDIA'
     env['KERNEL_OPTS']=[]    
+    cpu=getOpt('cpu','CPU','-1')
     gpu=getOpt('gpu','GPU','-1')
     acc=getOpt('acc','ACC','-1')
     devidxflag='-DDEVIDX=-1'
     platidxflag='-DPLATIDX=-1'
+    if cpu!='-1':
+        devidxflag='-DDEVIDX='+cpu
+        dev='CPU'      
     if gpu!='-1':
         devidxflag='-DDEVIDX='+gpu
         dev='GPU'    
@@ -175,7 +199,15 @@ def initOcl(*envt):
         devidxflag='-DDEVIDX='+devidx
     if platidx!='-1':
         platidxflag='-DPLATIDX='+platidx
-    print(platidxflag)
+    platidx_devidx_status=getPlatDevIdxFromPlatDec(plat,dev) 
+    status=platidx_devidx_status[0]        
+    if status==0:
+        platidx=platidx_devidx_status[0]
+        devidx=platidx_devidx_status[0]
+    else:
+        print("No valid platform or device for "+plat+"/"+dev)
+        exit(1)
+        
     kernel=getOpt('kernel','KERNEL','1')
     sel=getOpt('sel','SELECT','1')
     nth=getOpt('nth','#threads','1')
@@ -288,29 +320,19 @@ def initOcl(*envt):
         env['CXX'] = [ os.environ['CXX_COMPILER'] ]
     elif 'CXX' in os.environ:
         env['CXX'] = [ os.environ['CXX'] ]
-    # if True or plat!='Altera':
     if ('GCXX' in  os.environ and  os.environ['CXX'] ==  os.environ['GCXX'] and int(os.environ['GCXX_VERSION'])<480):
         print('OLD GCXX: '+os.environ['GCXX_VERSION'])
         env.Append(CXXFLAGS = ['-std=c++0x','-m64','-fPIC','-DOLD_CXX',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     else:
         env.Append(CXXFLAGS = ['-std=c++11',wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
-    # else:    
-    #     env.Append(CXXFLAGS = [wflag,dbgflag,dbgmacro,optflag]+DEVFLAGS+KERNEL_OPTS) 
     env.Append(CFLAGS = [wflag,dbgflag,optflag]+DEVFLAGS+KERNEL_OPTS)     
     env['MACROS'] = DEVFLAGS
     #env.Append(CXXFLAGS = ['-mcmodel=large']
 
     env.Help(help)
-#if useOclWrapper:
-#env.Append(CPPPATH=[OPENCL_DIR,OPENCL_DIR+'/OpenCLIntegration'])    
     env.Append(CPPPATH=[OPENCL_DIR+'/OpenCLIntegration'])    
-#   else:
-#       env.Append(CPPPATH=[OPENCL_DIR])    
     if OSX==1:
         env.Append(FRAMEWORKS=['OpenCL'])
-#        if useDyn=='1' and useF=='1':
-#            env.Append(LIBPATH=['.'])
-#            env.Append(LIBS=['OclWrapper'])
     else:    
         if plat !='Altera':
             env.Append(LIBS=['OpenCL'])
@@ -375,7 +397,6 @@ def initOcl(*envt):
             else:    
                 flib = env.Library('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
             fflib = env.Object('oclWrapper.o',OPENCL_DIR+'/OpenCLIntegration/oclWrapper.f95')
-#    else:            
     if useOclWrapper:
         if useDyn=='1':
             lib = env.Library('OclWrapper',oclsources)
@@ -387,11 +408,9 @@ def initOcl(*envt):
 
     if useOclWrapper:
         if useF:
-            #env.Append(LIBS=['OclWrapperF','stdc++'])
             env.Append(LIBS=['stdc++'])
             env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
-#    else:
         env.Append(LIBS=['OclWrapper'])
         env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', lib)
         env.Alias('install',OPENCL_DIR+'/OpenCLIntegration/lib', lib)
@@ -407,4 +426,13 @@ def buildF(env,appname,sources):
 #    VariantDir('.',OPENCL_DIR+'/OpenCLIntegration/')
     env.Program(appname+'_'+dev+'_'+plat+'_'+kernel,sources+['oclWrapper.o'])
 
-
+def getPlatDevIdxFromPlatDec(plat,dev):
+    res =  subprocess.check_output( ['perl', OPENCL_DIR+'/OpenCLIntegration/get-plat-dev-idx-from-clinfo.pl',plat,dev])
+    dec_res = res.decode()
+    res_array = list(map(int, dec_res.split(',')))
+    # [platidx,devidx, status]
+    # status: 
+    # 0: success
+    # 1: invalid platidx
+    # 2: invalid devidx
+    return res_array
