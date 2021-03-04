@@ -199,13 +199,16 @@ def initOcl(*envt):
         devidxflag='-DDEVIDX='+devidx
     if platidx!='-1':
         platidxflag='-DPLATIDX='+platidx
-    platidx_devidx_status=getPlatDevIdxFromPlatDec(plat,dev) 
-    status=platidx_devidx_status[0]        
+    platidx_devidx_status=getPlatDevIdxFromPlatDec(plat,dev)     
+    status=platidx_devidx_status[2]        
     if status==0:
         platidx=platidx_devidx_status[0]
-        devidx=platidx_devidx_status[0]
+        devidx=platidx_devidx_status[1]
+    elif status==1:    
+        print("No valid platform for "+plat+"/"+dev)
+        exit(1)
     else:
-        print("No valid platform or device for "+plat+"/"+dev)
+        print("No valid device for "+plat+"/"+dev)
         exit(1)
         
     kernel=getOpt('kernel','KERNEL','1')
@@ -430,6 +433,7 @@ def getPlatDevIdxFromPlatDec(plat,dev):
     res =  subprocess.check_output( ['perl', OPENCL_DIR+'/OpenCLIntegration/get-plat-dev-idx-from-clinfo.pl',plat,dev])
     dec_res = res.decode()
     res_array = list(map(int, dec_res.split(',')))
+    # print(plat,dev,res_array)
     # [platidx,devidx, status]
     # status: 
     # 0: success
