@@ -145,7 +145,7 @@ class OclWrapper {
 		OclWrapper (int deviceIdx);
 		OclWrapper (int deviceIdx, int platformIdx);
 //		OclWrapper (const char* ksource, const char* kname, const char* kopts="");
-        OclWrapper (const char* ksource, const char* kname, const char* kopts="",int devIdx=-1);
+        OclWrapper (const char* ksource, const char* kname, const char* kopts="",int devIdx=-1,int platIdx=-1);
 		void initOclWrapper(const char* ksource, const char* kname, const char* kopts="");
 
 		bool hasCPU(int pIdx);
@@ -154,6 +154,7 @@ class OclWrapper {
 		void showDeviceInfo();
 		int nDevices(int pIdx, std::string dev);
 		void selectDevice(int platformIdx, int deviceIdx, DeviceType devt);
+		void selectDevice(int platformIdx, int deviceIdx);
 		void selectDevice(int deviceIdx);
 		void selectDevice();
 		void selectCPU();

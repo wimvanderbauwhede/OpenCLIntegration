@@ -50,7 +50,7 @@ nPlatforms(0), ncalls(0) {
         
     }
 // This is the Ctor used for Fortran oclInit()
-OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts,int devIdx) :
+OclWrapper::OclWrapper (const char* ksource, const char* kname, const char* kopts,int devIdx, int platIdx) :
 #ifdef DEV_GPU
 useCPU(false),
 useGPU(true),
@@ -80,18 +80,34 @@ nPlatforms(0), ncalls(0) {
 			platformInfo.show(platformList,i);
 		}
 #endif
+#ifdef PLATIDX
 #ifdef DEVIDX
 #if DEVIDX != -1        
-		selectDevice( DEVIDX );
+		selectDevice( PLATIDX, DEVIDX );
 #else        
 		selectDevice();
 #endif       
 #else
         if (devIdx == -1) {
-		selectDevice();
+			selectDevice();
         } else {
-		selectDevice(devIdx);
+			selectDevice(devIdx);
         }
+#endif
+#else
+#ifdef DEVIDX
+#if DEVIDX != -1        
+		selectDevice( platIdx, DEVIDX );
+#else        
+		selectDevice();
+#endif       
+#else
+        if (devIdx == -1) {
+			selectDevice();
+        } else {
+			selectDevice(platIdx,devIdx);
+        }
+#endif
 #endif        
 //        std::cout << "OclWrapper: KERNEL_OPTS: <"<<kopts << ">\n";
         
@@ -467,6 +483,61 @@ void OclWrapper::selectDevice(int devIdx) {
 	deviceInfo.show(devices[deviceIdx]);
 #endif
 } // END of selectDevice()
+
+void OclWrapper::selectDevice(int platIdx, int devIdx) {
+
+	// So we must first select the platform that has a GPU, then the device that is a GPU
+	//bool useCPU = not useGPU;
+	platformIdx=0;
+	deviceIdx=0;
+	if (platIdx==-1) {
+	for (unsigned int i=0; i<platformList.size();i++) {
+
+		if ((useGPU && hasGPU(i)) 
+				|| (useCPU && hasCPU(i))
+				|| (useACC && hasACC(i))
+		   ) {
+			platformIdx=i;
+			break;
+		}
+	}
+	} else {
+		platformIdx = platIdx;
+	}
+	if (devIdx==-1) {
+        //std::cout << "Automatic device selection: ";
+		for (unsigned int i=0;i<devices.size();i++) {
+			if ( (useGPU && deviceInfo.isGPU(devices[i])) 
+		|| (useCPU && deviceInfo.isCPU(devices[i])) 
+		|| (useACC && deviceInfo.isACC(devices[i])) 
+		) {
+				deviceIdx=i;
+#ifdef DEVINFO
+				std::cout << "Found platform "<<platformIdx<< " for ";
+				if (useGPU) {
+					std::cout << "GPU " <<deviceIdx<<"\n";
+				} else if (useACC) {
+					std::cout << "ACC " << deviceIdx <<"\n";
+				} else if (useCPU) {
+					std::cout << "CPU " << deviceIdx << "\n";
+				} 
+#endif
+				break;
+			}
+		}
+	} else {
+        deviceIdx=devIdx;
+    }
+	getContextAndDevices();
+
+#ifdef DEVINFO
+	std::cout << "Number of devices: "<<devices.size() << "\n";
+	std::cout << "Device Info for Platform "<<platformIdx << ", Device "<<deviceIdx<<"\n";
+	deviceInfo.show(devices[deviceIdx]);
+#endif
+} // END of selectDevice()
+
+
 
 void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
 //    std::cout <<"buildProgram(): build Program with options <"<< kopts<<">\n";

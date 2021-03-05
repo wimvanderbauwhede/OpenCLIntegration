@@ -51,7 +51,7 @@ def initOcl(*envt):
     else:
         env=envt[0]
 
-    global opts,dev,plat,sdk, devidx,platidx,multi,kernel,kopts,kernel_opts,useF,useDyn, mcModel, OPENCL_DIR, useOclWrapper, sel
+    global opts,dev,plat,sdk, devidx,platidx,multi,kernel,kopts,kernel_opts,useF,useFC,useDyn, mcModel, OPENCL_DIR, useOclWrapper, sel
 
     OPENCL_DIR=os.environ['OPENCL_DIR']
     
@@ -64,8 +64,8 @@ def initOcl(*envt):
     *mcm=s|m|l [s] mcmodel flag for gcc/gfortran
     *plat=AMD|NVIDIA|Intel|Altera|Xilinx|MIC [NVIDIA]
     *dev=CPU|GPU|ACC|FPGA [GPU] device
-    *devidx=device index as reported by `clinfo -l`
-    *platidx=platform index as reported by `clinfo -l`
+    *devidx=device index as reported by `clinfo -l`, will be guessed from plat/dev
+    *platidx=platform index as reported by `clinfo -l`, will be guessed from plat/dev
      cpu=-1|0|1 [-1, means automatic selection]
      gpu=-1|0|1 [-1, means automatic selection]
      acc=-1|0|1 [-1, means automatic selection]
@@ -102,9 +102,10 @@ def initOcl(*envt):
     The macros controlled by the other options are listed on the right
     The directory for the OclWrapper can be accessed via OclBuilder.OPENCL_DIR
 
-    The following environment variables must be set (see OPENCL_DIR/ocl_env.sh):
+    The environment variables listed in "$OPENCL_DIR/ocl_env.sh" must be set.
 
-    """ + envs
+    """ 
+    # + "\n"+ envs
 
    # by default, use the OclWrapper.
     if not 'useOclWrapper' in globals():    
@@ -184,6 +185,24 @@ def initOcl(*envt):
     cpu=getOpt('cpu','CPU','-1')
     gpu=getOpt('gpu','GPU','-1')
     acc=getOpt('acc','ACC','-1')
+
+    platidx_devidx_status=getPlatDevIdxFromPlatDec(plat,dev)     
+    status=platidx_devidx_status[2]        
+    if status==0:
+        # if platidx/devidx had been set explicitly, we don't overwrite them
+        if platidx!=-1: 
+            platidx=platidx_devidx_status[0]
+        if devidx!=-1:
+            devidx=platidx_devidx_status[1]
+    elif status==1:    
+        print("No valid platform for "+plat+"/"+dev)
+        exit(1)
+    elif status==2: 
+        print("No valid device for "+plat+"/"+dev)
+        exit(1)
+    else:
+        print("No clinfo progam, continuing with default values platidx="+str(platidx)+"/devidx="+str(devidx))
+    print(platidx,devidx)        
     devidxflag='-DDEVIDX=-1'
     platidxflag='-DPLATIDX=-1'
     if cpu!='-1':
@@ -195,21 +214,11 @@ def initOcl(*envt):
     if acc!='-1':
         devidxflag='-DDEVIDX='+acc
         dev='ACC'
-    if devidx!='-1':
-        devidxflag='-DDEVIDX='+devidx
-    if platidx!='-1':
-        platidxflag='-DPLATIDX='+platidx
-    platidx_devidx_status=getPlatDevIdxFromPlatDec(plat,dev)     
-    status=platidx_devidx_status[2]        
-    if status==0:
-        platidx=platidx_devidx_status[0]
-        devidx=platidx_devidx_status[1]
-    elif status==1:    
-        print("No valid platform for "+plat+"/"+dev)
-        exit(1)
-    else:
-        print("No valid device for "+plat+"/"+dev)
-        exit(1)
+    if devidx!=-1:
+        devidxflag='-DDEVIDX='+str(devidx)
+    if platidx!=-1:
+        platidxflag='-DPLATIDX='+str(platidx)
+
         
     kernel=getOpt('kernel','KERNEL','1')
     sel=getOpt('sel','SELECT','1')
@@ -270,10 +279,13 @@ def initOcl(*envt):
 
 
     useF=getOpt('F','Functional',0)
+    useFC='0'
     if 'useF' in env:
         if env['useF']==1:
             useF='1'
-
+    if 'useFC' in env:
+        if env['useFC']==1:
+            useFC='1'
     useDyn=getOpt('dyn','Dynamic Library',0)
     if 'useDyn' in env:
         if env['useDyn']==1:
@@ -401,6 +413,11 @@ def initOcl(*envt):
                 flib = env.Library('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
             fflib = env.Object('oclWrapper.o',OPENCL_DIR+'/OpenCLIntegration/oclWrapper.f95')
     if useOclWrapper:
+        if useFC=='1':
+            if useDyn=='1':
+                flib = env.SharedLibrary('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
+            else:    
+                flib = env.Library('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])            
         if useDyn=='1':
             lib = env.Library('OclWrapper',oclsources)
         else:        
@@ -408,13 +425,23 @@ def initOcl(*envt):
         env.Append(LIBPATH=['.',OPENCL_DIR+'/OpenCLIntegration/'])
     else:        
         env.Append(LIBPATH=['.'])
-
+# WRONG: -lOpenCL -lstdc++ -lOclWrapperF -lOclWrapper        
+# SHOULD BE: -lOclWrapperF -lOclWrapper -lOpenCL -lstdc++
     if useOclWrapper:
         if useF:
             env.Append(LIBS=['stdc++'])
             env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
-        env.Append(LIBS=['OclWrapper'])
+            env.Prepend(LIBS=['OclWrapper'])
+            env.Prepend(LIBS=['OclWrapperF'])
+        elif useFC:
+            # env.Append(LIBS=['stdc++'])
+            env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
+            env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
+            env.Prepend(LIBS=['OclWrapper'])
+            env.Prepend(LIBS=['OclWrapperF'])            
+        else:
+            env.Prepend(LIBS=['OclWrapper'])
         env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', lib)
         env.Alias('install',OPENCL_DIR+'/OpenCLIntegration/lib', lib)
     return env
@@ -427,7 +454,10 @@ def build(appname,sources):
 def buildF(env,appname,sources):
     global opts, OPENCL_DIR
 #    VariantDir('.',OPENCL_DIR+'/OpenCLIntegration/')
-    env.Program(appname+'_'+dev+'_'+plat+'_'+kernel,sources+['oclWrapper.o'])
+    if useF=='1':
+        env.Program(appname+'_'+dev+'_'+plat+'_'+kernel,sources+['oclWrapper.o'])
+    else:
+        env.Program(appname+'_'+dev+'_'+plat+'_'+kernel,sources)
 
 def getPlatDevIdxFromPlatDec(plat,dev):
     res =  subprocess.check_output( ['perl', OPENCL_DIR+'/OpenCLIntegration/get-plat-dev-idx-from-clinfo.pl',plat,dev])

@@ -12,7 +12,11 @@ The logic is
 - If it is AMD, it is either a GPU or a CPU, so look at $dev
 - If it is Xilinx, it must be an FPGA (TODO)
 =cut
-
+my $test_clinfo = `which clinfo`;
+chomp $test_clinfo;
+if ($test_clinfo eq '') {
+    return '-1,-1,4';
+}
 my @i=`clinfo -l`; 
 my @entries =map {[split(/:/,$_)]} map {chomp;$_} @i;
 
