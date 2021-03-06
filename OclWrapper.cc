@@ -549,9 +549,13 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
             std::istreambuf_iterator<char>(file),
             (std::istreambuf_iterator<char>())
             );
+#ifndef OCLV22				
     cl::Program::Sources source(1, std::make_pair(prog.c_str(), prog.length()+1));
 
     program_p = new cl::Program(*context_p, source);
+#else
+	program_p = new cl::Program(*context_p,prog,false);
+#endif
 //    std::cout <<"build Program with options <"<< kopts_str<<">\n";
     err = program_p->build(devices,kopts_str.c_str());
     std::string err_str("Program::build(");
@@ -581,7 +585,7 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
 //    err = program_p->build(devices,"");
 //    checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::build()");
 //}
-
+#ifndef OCLV2
 // ---------------------------------------------------------------------
 // This loads a binary, turns it into a cl::Program and builds it
 void OclWrapper::loadBinary(const char* ksource) {
@@ -596,6 +600,8 @@ void OclWrapper::loadBinary(const char* ksource) {
             );
 
     cl::Program::Binaries binaries(1, std::make_pair((void*)prog.c_str(), prog.length())); // WV: the original code had prog.length()+1
+
+	
 // std::cout <<"Binary size: "<< prog.length()<<"\n";
 #ifdef OCLV2
     std::vector<cl_int> binaryStatus;
@@ -653,7 +659,7 @@ void OclWrapper::storeBinary(const char* kbinname) {
             binfile.close();
             
 }
-
+#endif
 void OclWrapper::reloadKernel(const char* kname) {
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;
@@ -836,7 +842,7 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
     //delete event;
     return kernel_exec_time;
 }
-
+#ifndef OCLV22
 int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
 	if ((void*)queue_p==NULL) {
@@ -866,7 +872,8 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 #endif	
 	return ncalls;
 }
-
+#endif
+#ifndef OCLV22
 int OclWrapper::enqueueNDRangeOffset(const cl::NDRange& offset,const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
 	if ((void*)queue_p==NULL) {
@@ -906,7 +913,7 @@ cl::Buffer& OclWrapper::makeWriteBuffer(int bufSize) {
 	cl::Buffer& buf_r = *buf_p;
 	return buf_r;
 }
-
+#endif
 void OclWrapper::makeWriteBufferPos(int argpos, int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,
@@ -1025,7 +1032,11 @@ void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, int bufSize, void* host
 
 void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, bool blocking_read,
 		::wv_size_t offset, ::wv_size_t bufSize, void * hostBuf,
+#ifndef OCLV22		
 		const VECTOR_CLASS<cl::Event> * events,
+#else
+		const std::vector<cl::Event> * events,
+#endif		
 		cl::Event * event) {
 	err = queue_p->enqueueReadBuffer(
 			deviceBuf,
@@ -1055,7 +1066,11 @@ void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, int bufSize, const void
 
 void OclWrapper::readBuffer(const cl::Buffer& deviceBuf, bool blocking_read,
 		::wv_size_t offset, ::wv_size_t bufSize, const void * hostBuf,
+#ifndef OCLV22		
 		const VECTOR_CLASS<cl::Event> * events,
+#else
+		const std::vector<cl::Event> * events,
+#endif	
 		cl::Event * event) {
 	err = queue_p->enqueueReadBuffer(
 			deviceBuf,
@@ -1096,7 +1111,11 @@ void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, int bufSize, void* hos
 
 void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, bool blocking_write,
 		::wv_size_t offset, ::wv_size_t bufSize, void * hostBuf,
+#ifndef OCLV22		
 		const VECTOR_CLASS<cl::Event> * events,
+#else
+		const std::vector<cl::Event> * events,
+#endif	
 		cl::Event * event) {
 	err = queue_p->enqueueWriteBuffer(
 			deviceBuf,
@@ -1124,7 +1143,11 @@ void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, int bufSize, const voi
 
 void OclWrapper::writeBuffer(const cl::Buffer& deviceBuf, bool blocking_write,
 		::wv_size_t offset, ::wv_size_t bufSize, const void * hostBuf,
+#ifndef OCLV22		
 		const VECTOR_CLASS<cl::Event> * events,
+#else
+		const std::vector<cl::Event> * events,
+#endif	
 		cl::Event * event) {
 	err = queue_p->enqueueWriteBuffer(
 			deviceBuf,

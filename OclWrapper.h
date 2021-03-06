@@ -116,9 +116,8 @@ class OclWrapper {
 		cl::KernelFunctor runKernel;
 		cl::KernelFunctor kernel_functor;
 #else
-#ifdef OCLV22
+#ifndef OCLV22
 		cl::KernelFunctor runKernel;
-#else
 		OclKernelFunctor runKernel;
 #endif
 #endif
@@ -167,9 +166,10 @@ class OclWrapper {
 		void loadKernel(const char* kname);
 		void loadKernel(const char* ksource, const char* kname);
 		void loadKernel(const char* ksource, const char* kname, const char* opts);
+#ifndef OCLV2		
 		void loadBinary(const char* ksource);
 		void storeBinary(const char* ksource);
-
+#endif
 		int getMaxComputeUnits();
 		int getGlobalMemCacheType();
 		unsigned long int getGlobalMemSize();
@@ -193,8 +193,12 @@ class OclWrapper {
 		void setArg(unsigned int idx, const cl::Buffer& buf);
 		void setArg(unsigned int idx, const int buf);
 		void setArg(unsigned int idx, const float buf);
+#ifndef OCLV22		
 		int enqueueNDRangeOffset(const cl::NDRange& = cl::NDRange(0),const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
+#endif		
+#ifndef OCLV22		
 		int enqueueNDRange(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
+#endif
 		int enqueueNDRangeRun(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		float enqueueNDRangeRun(unsigned int = 1, unsigned int = 0);
 		void readBuffer(const cl::Buffer& deviceBuf, int bufSize, void* hostBuf);
@@ -205,7 +209,11 @@ class OclWrapper {
 				::wv_size_t offset,
 				::wv_size_t size,
 				void * ptr,
+#ifndef OCLV22				
 				const VECTOR_CLASS<cl::Event> * events = NULL,
+#else
+				const std::vector<cl::Event> * events = NULL,
+#endif				
 				cl::Event * event = NULL);
 		void readBuffer(
 				const cl::Buffer& buffer,
@@ -213,7 +221,11 @@ class OclWrapper {
 				::wv_size_t offset,
 				::wv_size_t size,
 				const void * ptr,
+#ifndef OCLV22				
 				const VECTOR_CLASS<cl::Event> * events = NULL,
+#else
+				const std::vector<cl::Event> * events = NULL,
+#endif				
 				cl::Event * event = NULL);
 //		void readStaticBuffer(int idx, int bufSize, void* hostBuf);
 		void readBufferPos(int argpos, int bufSize, void* hostBuf);
@@ -225,7 +237,11 @@ class OclWrapper {
 				::wv_size_t offset,
 				::wv_size_t size,
 				void * ptr,
+#ifndef OCLV22				
 				const VECTOR_CLASS<cl::Event> * events = NULL,
+#else
+				const std::vector<cl::Event> * events = NULL,
+#endif				
 				cl::Event * event = NULL);
 		void writeBuffer(const cl::Buffer& deviceBuf, int bufSize, const void* hostBuf);
 		void writeBuffer(
@@ -234,7 +250,11 @@ class OclWrapper {
 				::wv_size_t offset,
 				::wv_size_t size,
 				const void * ptr,
+#ifndef OCLV22				
 				const VECTOR_CLASS<cl::Event> * events = NULL,
+#else
+				const std::vector<cl::Event> * events = NULL,
+#endif				
 				cl::Event * event = NULL);
 		void writeBufferPos(int argpos, int bufSize, void* hostBuf);
 #ifdef OPENCL_TIMINGS

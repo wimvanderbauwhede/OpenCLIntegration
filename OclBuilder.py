@@ -71,7 +71,7 @@ def initOcl(*envt):
      acc=-1|0|1 [-1, means automatic selection]
      O=[gcc -O flag] [3]
      F=0|1 [0] use the functional (non-OO) interface OclBuilder.useF
-     V=1.1|1.2 [1.2] OpenCL C++ API version
+     V=1.1|1.2|2.x [1.2] OpenCL C++ API version
      info=0|1                                        (DEVINFO, PLATINFO)
     *oclwrapper=0|1 [1] use the OclWrapper API       OclBuilder.useOclWrapper
 
@@ -202,7 +202,7 @@ def initOcl(*envt):
         exit(1)
     else:
         print("No clinfo progam, continuing with default values platidx="+str(platidx)+"/devidx="+str(devidx))
-    print(platidx,devidx)        
+    # print(platidx,devidx)        
     devidxflag='-DDEVIDX=-1'
     platidxflag='-DPLATIDX=-1'
     if cpu!='-1':
@@ -266,9 +266,22 @@ def initOcl(*envt):
 
     version=getOpt('V','Version','1.2') 
     verflag=''
-    if version=='1.2':
+    ver2flag=''
+    tgtver=''
+    hpptgtver=''
+    if version[0:2]=='2.':
+        # TODO: derive this from the version!
+        numver=int(100*float(version))
+        tgtver='-DCL_TARGET_OPENCL_VERSION='+str(numver)
+        hppnumver=numver
+        # A HACK!        
+        if hppnumver>210:
+            hppnumver=210
+        hpptgtver = '-DCL_HPP_TARGET_OPENCL_VERSION='+str(hppnumver) #210
+    if version=='1.2' or version[0:2]=='2.':
         verflag='-DOCLV2'
-    ver2flag='' #'-DOCLV22'
+    if version[0:2]=='2.':        
+        ver2flag='-DOCLV22'
     dbg=getOpt('dbg','Debug','0')    
     dbgflag='-g'
     dbgmacro='-DOCLDBG=1'
@@ -310,8 +323,8 @@ def initOcl(*envt):
         deflist=defs.split(',')
         defflags=map (lambda s: '-D'+s, deflist)   
 
-    tgtver = '-DCL_HPP_TARGET_OPENCL_VERSION=210'
-    DEVFLAGS=['-DDEV_'+dev,devidxflag,platidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, ver2flag, tgtver, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
+    
+    DEVFLAGS=['-DDEV_'+dev,devidxflag,platidxflag]+env['KERNEL_OPTS']+['-DNRUNS='+nruns,'-DNGROUPS='+ngroups,'-DREF='+ref,vflag,verflag, ver2flag, tgtver, hpptgtver, memreadflag,devinfoflag,platinfoflag,multimacro]+defflags
     if plat=='Altera':
         DEVFLAGS+=['-DFPGA']
     if dev=='CPU':
