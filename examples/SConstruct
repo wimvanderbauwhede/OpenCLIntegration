@@ -1,0 +1,8 @@
+#import OclBuilder 
+from OclBuilder import build
+
+# GPU-accelerated or reference implementation?
+build('matacc', ['matacc_with_wrapper.cc'])
+
+  
+

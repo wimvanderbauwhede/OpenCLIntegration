@@ -5,14 +5,11 @@
 
 This project provides the following:
 
-
 `OclWrapper`: and OpenCL wrapper class in C++ with additional bindings for Fortran, C and Perl.
 `OclBuilder.py`: a SCons builder library for OpenCL applications that use `OclWrapper`
 `ocl_env.sh`: environment variables used by `OclBuilder.py` (bash syntax)
 
 ## Usage
-
-
 
 To use the OclWrapper and OclBuilder, you need the following:
 
@@ -31,16 +28,11 @@ The environment variables defined in `ocl_env.sh` are the following, you should 
 
     # OpenCL SDK paths
     # NVIDIA
-    export NVSDKCUDA_ROOT="/Developer/GPU\ Computing/"
+    export NVSDKCUDA_ROOT="..."
     # AMD
-    export AMDAPPSDKROOT=/usr/local/AMD-APP-SDK
+    export AMDAPPSDKROOT="..."
     # Intel
-    export INTELOCLSDKROOT=/usr
-    # Altera
-    export ALTERAOCLSDKROOT=/path/to/altera/oclsdk
-    export AOCL_BOARD_PACKAGE_ROOT=/path/to/altera/bsp
-    # Xilinx
-    # TBA
+    export INTELOCLSDKROOT="..."
 
     # Compilers
     export CXX_COMPILER=/usr/bin/g++
@@ -84,7 +76,7 @@ For a simple build, you can also do
 
       build(appname,sources)
 
-### Non-scons builds
+### Building without Scons
 
 If you use Make or another build system for the rest of your code, then just build the OclWrapper library with SCons and
 use it in your build script. For example, to integrate OpenCL into Fortran, your SConscript looks
@@ -99,7 +91,7 @@ and in your Makefile, add the following:
 
       OCLINTDIR = $(OPENCL_INT_DIR)
       OCL_OBJS = oclWrapper.o
-      OCL_LDFLAGS =  -L../opencl_wrapper -L$(OCLINTDIR) \
+      OCL_LDFLAGS =  -L/path/to/OclWrapper -L$(OCLINTDIR) \
                      -lOclWrapperF -lstdc++ -lOclWrapper -lOpenCL
 
 ### C++ API

@@ -647,15 +647,9 @@ void OclWrapper::storeBinary(const char* kbinname) {
 #else
 	cl::vector<char*> binaries;
 #endif
-    //WV: This does not work
-	//err = program_p->getInfo(CL_PROGRAM_BINARIES,&binaries);
     // WV: Digging into cl.hpp (version 1.2.6), I found this:
 	binaries = program_p->getInfo<CL_PROGRAM_BINARIES>(&err);
 	checkErr(err, "Program::getInfo(CL_PROGRAM_BINARIES)");
-   // std::cout << "HERE2\n";
-
- //  std::cout << "\nbinaries.size(): " << binaries.size() << "\n";
-//   exit(0);
   
 // Store the binary for the device 
             std::ofstream binfile(kbinname,std::ofstream::binary);
@@ -825,34 +819,6 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
     return kernel_exec_time;
 }
 
-//#ifndef OCLV22
-// The problem is that in v2.x, the kernelFunctor is a template that needs the types of the arguments
-// e.g. cl::make_kernel< cl::Buffer, cl::Buffer, cl::Buffer, cl_uint > runKernel( *(ocl.kernel_p))
-
-    // auto runKernel =
-    //     cl::KernelFunctor<
-    //         cl::Buffer,
-    //         cl::Buffer,
-    //         cl::Buffer,
-    //         unsigned int
-    //     >(matMultProgram, "matmultKernel"); // so that would be *program_p, and the kname string should be an extra class attribute kernelName
-// cl::Program matMultProgram(programStrings);
-// 
-// And then this is called as 
-    // cl::Event event = matMultKernel(
-    //     cl::EnqueueArgs(
-    //         cl::NDRange(mSize),
-    //         cl::NullRange
-    //     ),
-    //     mA_buf,
-    //     mB_buf,
-    //     mC_buf,
-    //     mWidth,
-    //     error
-
-    // );
-    // event.wait();
-
 
 int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
@@ -869,9 +835,7 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 #endif	
 	return ncalls;
 }
-//#endif
 
-//#ifndef OCLV22
 int OclWrapper::enqueueNDRangeOffset(const cl::NDRange& offset,const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
 	if ((void*)queue_p==NULL) {
