@@ -724,7 +724,6 @@ void OclWrapper::setArg(unsigned int idx, const int buf) {
 }
 
 int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
-//    std::cout << "enqueueNDRangeRun( )\n";
 	// Create the CommandQueue
     if ((void*)queue_p==NULL) {
 #ifdef VERBOSE
@@ -734,14 +733,7 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
             checkErr(err, "CommandQueue::CommandQueue()");
     }
 	ncalls++;
-// VERBOSE
-	//std::cout << "# kernel calls: "<<ncalls <<std::endl;
 	cl::Event event; 
-#ifdef VERBOSE
-    //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
-    //std::cout << infostr <<"\n";
-#endif // VERBOSE
-
     bool zeroGlobalRange = false;
     if (       
             globalRange[0]==0
@@ -752,30 +744,23 @@ int OclWrapper::enqueueNDRangeRun(const cl::NDRange& globalRange,const cl::NDRan
     }
     if (zeroGlobalRange) {
         std::cerr << "WARNING: GlobalRange is 0!\n";
-        //std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<< 0 <<","<<localRange<<")\n";
         err = queue_p->enqueueNDRangeKernel(
                 *kernel_p,
                 cl::NullRange,
                 cl::NullRange,localRange,
                 NULL,&event);
     } else {
-        //std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
         err = queue_p->enqueueNDRangeKernel(
                 *kernel_p,
                 cl::NullRange,
                 globalRange,localRange,
                 NULL,&event);
     }
-    //std::cout<<"call to event.wait()\n";
-	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
-	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
-    //std::cout << "done waiting\n";
-
+	event.wait();
     //delete event;
     return ncalls;
 }
 float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localRange) {
-    //std::cout << "enqueueNDRangeRun( pointers )\n";
 	// Create the CommandQueue
     if ((void*)queue_p==NULL) {
 #ifdef VERBOSE
@@ -785,11 +770,7 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
             checkErr(err, "CommandQueue::CommandQueue()");
     }
 	ncalls++;
-	cl::Event event; 
-#ifdef VERBOSE
-    //const std::string infostr = this->kernel_p->getInfo<CL_KERNEL_FUNCTION_NAME>() ;
-    //std::cout << infostr <<"\n";
-#endif // VERBOSE
+	cl::Event event;
 
     bool zeroGlobalRange = (globalRange==0) ? true : false;
     bool zeroLocalRange = (localRange == 0) ? true : false;
@@ -803,11 +784,9 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
 				    cl::NullRange,cl::NullRange,
 				    NULL,&event);
 	    } else {
-		    //      std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
 		    err = queue_p->enqueueNDRangeKernel(
 				    *kernel_p,
 				    cl::NullRange,
-				    //*globalRange,*localRange,
 				    cl::NDRange(globalRange),cl::NullRange,
 				    NULL,&event);
 	    }
@@ -820,29 +799,52 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
 				    cl::NullRange,cl::NDRange(localRange),
 				    NULL,&event);
 	    } else {
-		    //    std::cout << "actuall call to queue_p->enqueueNDRangeKernel("<< kernel_p<<","<<globalRange<<","<<localRange<<")\n";
 		    err = queue_p->enqueueNDRangeKernel(
 				    *kernel_p,
 				    cl::NullRange,
-				    //*globalRange,*localRange,
 				    cl::NDRange(globalRange),cl::NDRange(localRange),
 				    NULL,&event);
 	    }
     }
-   // std::cout<<"call to event.wait()\n";
-	event.wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
+	event.wait();
 #ifdef OPENCL_TIMINGS
 	float kernel_exec_time=getExecutionTime(event);
-//	std::cout << "Kernel execution time: "<<kernel_exec_time<<"\n";
 #else
 	float kernel_exec_time=(float)ncalls;
 #endif
-	//event->wait(); // here is where it goes wrong with "-36, CL_INVALID_COMMAND_QUEUE
-  //  std::cout << "done waiting\n";
     //delete event;
     return kernel_exec_time;
 }
+
 #ifndef OCLV22
+// The problem is that in v2.x, the kernelFunctor is a template that needs the types of the arguments
+// e.g. cl::make_kernel< cl::Buffer, cl::Buffer, cl::Buffer, cl_uint > runKernel( *(ocl.kernel_p))
+
+    // auto runKernel =
+    //     cl::KernelFunctor<
+    //         cl::Buffer,
+    //         cl::Buffer,
+    //         cl::Buffer,
+    //         unsigned int
+    //     >(matMultProgram, "matmultKernel"); // so that would be *program_p, and the kname string should be an extra class attribute kernelName
+// cl::Program matMultProgram(programStrings);
+// 
+// And then this is called as 
+    // cl::Event event = matMultKernel(
+    //     cl::EnqueueArgs(
+    //         cl::NDRange(mSize),
+    //         cl::NullRange
+    //     ),
+    //     mA_buf,
+    //     mB_buf,
+    //     mC_buf,
+    //     mWidth,
+    //     error
+
+    // );
+    // event.wait();
+
+
 int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
 	if ((void*)queue_p==NULL) {
@@ -850,29 +852,16 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 	}
 	checkErr(err, "CommandQueue::CommandQueue()");
 	ncalls++;
-// VERBOSE
-	//std::cout << "# kernel calls: "<<ncalls <<std::endl;
 #ifndef OCLV2
 	runKernel=kernel_p->bind(*queue_p,globalRange, localRange);
 	kernel_functor=runKernel;
 #else
-#ifndef OCLV22
 	runKernel=bindKernel(*kernel_p,*queue_p,globalRange, localRange);
-#else
-	// runKernel=kernel_p->bind(*queue_p,globalRange, localRange);
-	#error "TODO: FIXME: NEEDS TOTAL REWORK!"
-    // runKernel =
-    //     cl::KernelFunctor<>(*program_p, "updateGlobal");
-    // runKernel(
-    //     cl::EnqueueArgs(
-    //     globalRange, localRange)
-	// );
-
-#endif	
 #endif	
 	return ncalls;
 }
 #endif
+
 #ifndef OCLV22
 int OclWrapper::enqueueNDRangeOffset(const cl::NDRange& offset,const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue

@@ -17,7 +17,9 @@
 // On OS X headers are in non-standard location
 #include <cl.hpp>
 #ifdef OCLV2
+#ifndef OCLV22
 #include <OclKernelFunctor.h>
+#endif
 #endif
 #else
 // Not OS X, i.e. Linux
@@ -117,7 +119,8 @@ class OclWrapper {
 		cl::KernelFunctor kernel_functor;
 #else
 #ifndef OCLV22
-		cl::KernelFunctor runKernel;
+// cl::KernelFunctor in v2.x is very different
+		// cl::KernelFunctor runKernel;
 		OclKernelFunctor runKernel;
 #endif
 #endif
@@ -143,7 +146,6 @@ class OclWrapper {
 		OclWrapper ();
 		OclWrapper (int deviceIdx);
 		OclWrapper (int deviceIdx, int platformIdx);
-//		OclWrapper (const char* ksource, const char* kname, const char* kopts="");
         OclWrapper (const char* ksource, const char* kname, const char* kopts="",int devIdx=-1,int platIdx=-1);
 		void initOclWrapper(const char* ksource, const char* kname, const char* kopts="");
 
