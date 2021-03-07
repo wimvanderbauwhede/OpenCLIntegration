@@ -816,7 +816,7 @@ float OclWrapper::enqueueNDRangeRun(unsigned int globalRange,unsigned int localR
     return kernel_exec_time;
 }
 
-#ifndef OCLV22
+//#ifndef OCLV22
 // The problem is that in v2.x, the kernelFunctor is a template that needs the types of the arguments
 // e.g. cl::make_kernel< cl::Buffer, cl::Buffer, cl::Buffer, cl_uint > runKernel( *(ocl.kernel_p))
 
@@ -860,9 +860,9 @@ int OclWrapper::enqueueNDRange(const cl::NDRange& globalRange,const cl::NDRange&
 #endif	
 	return ncalls;
 }
-#endif
+//#endif
 
-#ifndef OCLV22
+//#ifndef OCLV22
 int OclWrapper::enqueueNDRangeOffset(const cl::NDRange& offset,const cl::NDRange& globalRange,const cl::NDRange& localRange) {
 	// Create the CommandQueue
 	if ((void*)queue_p==NULL) {
@@ -880,14 +880,7 @@ int OclWrapper::enqueueNDRangeOffset(const cl::NDRange& offset,const cl::NDRange
 #endif	
 	return ncalls;
 }
-//cl::Buffer* OclWrapper::makeStaticWriteBuffer(int idx,int bufSize) {
-//	 buf[idx]= cl::Buffer(
-//	            *context_p,
-//	            CL_MEM_WRITE_ONLY,
-//	            bufSize,NULL,&err);
-//	 checkErr(err, "Buffer::Buffer()");
-//	return buf;
-//}
+//#endif
 
 cl::Buffer& OclWrapper::makeWriteBuffer(int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
@@ -902,7 +895,7 @@ cl::Buffer& OclWrapper::makeWriteBuffer(int bufSize) {
 	cl::Buffer& buf_r = *buf_p;
 	return buf_r;
 }
-#endif
+
 void OclWrapper::makeWriteBufferPos(int argpos, int bufSize) {
 	 cl::Buffer* buf_p= new cl::Buffer(
 	            *context_p,

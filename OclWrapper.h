@@ -17,9 +17,9 @@
 // On OS X headers are in non-standard location
 #include <cl.hpp>
 #ifdef OCLV2
-#ifndef OCLV22
+//#ifndef OCLV22
 #include <OclKernelFunctor.h>
-#endif
+//#endif
 #endif
 #else
 // Not OS X, i.e. Linux
@@ -29,10 +29,10 @@
 #else
 #include <CL/cl.hpp>
 #endif
-#ifndef OCLV22
+//#ifndef OCLV22
 // OpenCL v1.2
 #include <OclKernelFunctor.h>
-#endif
+//#endif
 #else
 #ifndef FPGA
 #include <cl.hpp>
@@ -118,11 +118,11 @@ class OclWrapper {
 		cl::KernelFunctor runKernel;
 		cl::KernelFunctor kernel_functor;
 #else
-#ifndef OCLV22
+//#ifndef OCLV22
 // cl::KernelFunctor in v2.x is very different
 		// cl::KernelFunctor runKernel;
 		OclKernelFunctor runKernel;
-#endif
+//#endif
 #endif
 #ifndef FPGA_MULTI_KERNEL        
 		cl::CommandQueue* queue_p;
@@ -195,12 +195,12 @@ class OclWrapper {
 		void setArg(unsigned int idx, const cl::Buffer& buf);
 		void setArg(unsigned int idx, const int buf);
 		void setArg(unsigned int idx, const float buf);
-#ifndef OCLV22		
+//#ifndef OCLV22		
 		int enqueueNDRangeOffset(const cl::NDRange& = cl::NDRange(0),const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
-#endif		
-#ifndef OCLV22		
+//#endif		
+//#ifndef OCLV22		
 		int enqueueNDRange(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
-#endif
+//#endif
 		int enqueueNDRangeRun(const cl::NDRange& = cl::NDRange(1),const cl::NDRange& = cl::NullRange);
 		float enqueueNDRangeRun(unsigned int = 1, unsigned int = 0);
 		void readBuffer(const cl::Buffer& deviceBuf, int bufSize, void* hostBuf);

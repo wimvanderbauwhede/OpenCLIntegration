@@ -441,13 +441,13 @@ def initOcl(*envt):
 # WRONG: -lOpenCL -lstdc++ -lOclWrapperF -lOclWrapper        
 # SHOULD BE: -lOclWrapperF -lOclWrapper -lOpenCL -lstdc++
     if useOclWrapper:
-        if useF:
+        if useF=='1':
             env.Append(LIBS=['stdc++'])
             env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Prepend(LIBS=['OclWrapper'])
             env.Prepend(LIBS=['OclWrapperF'])
-        elif useFC:
+        elif useFC=='1':
             # env.Append(LIBS=['stdc++'])
             env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
