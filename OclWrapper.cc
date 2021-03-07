@@ -585,7 +585,7 @@ void OclWrapper::buildProgram(const char* ksource, const char* kopts) {
 //    err = program_p->build(devices,"");
 //    checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::build()");
 //}
-#ifndef OCLV2
+//#ifndef OCLV2
 // ---------------------------------------------------------------------
 // This loads a binary, turns it into a cl::Program and builds it
 void OclWrapper::loadBinary(const char* ksource) {
@@ -639,7 +639,11 @@ void OclWrapper::storeBinary(const char* kbinname) {
  //  std::cout << "Kernel binary size for device "<< deviceIdx << ": "<< binarySizes[deviceIdx] << "\n";
     
 #ifdef OCLV2
+#ifndef OCLV22
 	std::vector<char*> binaries;
+#else
+	std::vector<std::vector<unsigned char>>
+#endif
 #else
 	cl::vector<char*> binaries;
 #endif
@@ -655,11 +659,16 @@ void OclWrapper::storeBinary(const char* kbinname) {
   
 // Store the binary for the device 
             std::ofstream binfile(kbinname,std::ofstream::binary);
+#ifndef OCLV22			
             binfile.write(binaries[deviceIdx], binarySizes[deviceIdx]);
+#else
+			char* binary_as_char_array = (char*)(&(binaries[deviceIdx])[0]);
+			binfile.write(binary_as_char_array, binarySizes[deviceIdx]);
+#endif			
             binfile.close();
             
 }
-#endif
+//#endif
 void OclWrapper::reloadKernel(const char* kname) {
     kernel_p= new cl::Kernel(*program_p, kname, &err);
     kernel = *kernel_p;

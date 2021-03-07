@@ -13,6 +13,10 @@
 #include <vector>
 #endif
 
+#ifdef OCLV22
+#define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY
+#endif
+
 #ifdef OSX
 // On OS X headers are in non-standard location
 #include <cl.hpp>
@@ -168,10 +172,10 @@ class OclWrapper {
 		void loadKernel(const char* kname);
 		void loadKernel(const char* ksource, const char* kname);
 		void loadKernel(const char* ksource, const char* kname, const char* opts);
-#ifndef OCLV2		
+//#ifndef OCLV2		
 		void loadBinary(const char* ksource);
 		void storeBinary(const char* ksource);
-#endif
+//#endif
 		int getMaxComputeUnits();
 		int getGlobalMemCacheType();
 		unsigned long int getGlobalMemSize();
