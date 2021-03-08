@@ -5,17 +5,17 @@
 
 This project provides the following:
 
-`OclWrapper`: and OpenCL wrapper class in C++ with additional bindings for Fortran, C and Perl.
-`OclBuilder.py`: a SCons builder library for OpenCL applications that use `OclWrapper`
-`ocl_env.sh`: environment variables used by `OclBuilder.py` (bash syntax)
+- `OclWrapper`: and OpenCL wrapper class in C++ with additional bindings for Fortran, C and Perl.
+- `OclBuilder.py`: a SCons builder library for OpenCL applications that use `OclWrapper`
+- `ocl_env.sh`: environment variables used by `OclBuilder.py` (bash syntax)
 
 ## Usage
 
 To use the OclWrapper and OclBuilder, you need the following:
 
-- The [scons](http://scons.org) build system, and therefore Python;
-- An OpenCL SDK;
-- A C++ compiler and depending on your target, a C or Fortran compiler, or Perl.
+- The [scons](http://scons.org) build system, and therefore Python 3;
+- An OpenCL SDK and an OpenCL capable device (e.g. your CPU or GPU);
+- A C++ compiler and depending on your target, a C or Fortran compiler, or Perl with the `Inline::C` module.
 
 Modify the environment variables from `ocl_env.sh` to reflect your system setup and put them in your `.bashrc` or `.profile` or equivalent.
 
@@ -24,7 +24,7 @@ Modify the environment variables from `ocl_env.sh` to reflect your system setup 
 The environment variables defined in `ocl_env.sh` are the following, you should change them to reflect the location of the SDKs on your system, the compilers used etc.:
 
     # Path to the OpenCLIntegration folder e.g.
-    export OPENCL_INT_DIR= $HOME/OpenCLIntegration
+    export OPENCL_DIR= $HOME/OpenCLIntegration
 
     # OpenCL SDK paths
     # NVIDIA
@@ -44,15 +44,17 @@ The environment variables defined in `ocl_env.sh` are the following, you should 
     export FC=$FORTRAN_COMPILER
 
     # Don't modify below this line
-    export OPENCL_GPU=`$OPENCL_INT_DIR/bin/test_gpu.pl`
-    export OPENCL_CPU=`$OPENCL_INT_DIR/bin/test_cpu.pl`
-    export OPENCL_ACC=`$OPENCL_INT_DIR/bin/test_acc.pl`
+    export OPENCL_GPU=`$OPENCL_DIR/bin/test_gpu.pl`
+    export OPENCL_CPU=`$OPENCL_DIR/bin/test_cpu.pl`
+    export OPENCL_ACC=`$OPENCL_DIR/bin/test_acc.pl`
 
-    export PYTHONPATH=$PYTHONPATH:$OPENCL_INT_DIR
-    export PATH=$OPENCL_INT_DIR/bin:$PATH
+    export PYTHONPATH=$PYTHONPATH:$OPENCL_DIR
+    export PATH=$OPENCL_DIR/bin:$PATH
 
 
-### Scons builds
+### Building your code with the OclWrapper
+
+#### Scons builds
 
 - In your SConstruct file:
 
@@ -65,7 +67,7 @@ The environment variables defined in `ocl_env.sh` are the following, you should 
 
       # Rest of your build as usual
 
-For a simple build, you can also do
+- For a simple build, you can also do:
 
       from OclBuilder import build
 
@@ -76,11 +78,21 @@ For a simple build, you can also do
 
       build(appname,sources)
 
-### Building without Scons
+- For building Fortran code with the OclWrapper:
 
-If you use Make or another build system for the rest of your code, then just build the OclWrapper library with SCons and
-use it in your build script. For example, to integrate OpenCL into Fortran, your SConscript looks
-like this:
+      from OclBuilder import initOcl, buildF
+
+      envF=Environment(useF=1)
+      envF=initOcl(envF)
+
+      fsources=['matacc.f95']
+
+      buildF(envF,'mataccF',fsources)
+
+#### Building your own code without Scons
+
+If you use Make or another build system for the rest of your code, you can build the OclWrapper library with SCons and then use it in your build script.
+For example, to integrate OpenCL into Fortran, your SConscript would look like this:
 
       from OclBuilder import initOcl
 
@@ -94,7 +106,11 @@ and in your Makefile, add the following:
       OCL_LDFLAGS =  -L/path/to/OclWrapper -L$(OCLINTDIR) \
                      -lOclWrapperF -lstdc++ -lOclWrapper -lOpenCL
 
-### C++ API
+### Using the OclWrapper
+
+In the `examples` folder there are a number of examples illustrating the use of `OclWrapper` with C++, Fortran and Perl. Below is a quick overview of the API.
+
+#### C++ API
 
 In  your C++ code:
 
@@ -113,7 +129,7 @@ In  your C++ code:
       ocl.readBuffer(...);
       // There are many more options, see OclWrapper.h code
 
-### Fortran API
+#### Fortran API
 
 In your Fortran code:
 
@@ -127,7 +143,7 @@ In your Fortran code:
       oclReadBuffer(...)
       ! There are  many more API calls, see `oclWrapper.f95` code
 
-### Perl API
+#### Perl API
 
 In your Perl code:
 
