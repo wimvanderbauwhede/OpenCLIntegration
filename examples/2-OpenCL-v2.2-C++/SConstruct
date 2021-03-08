@@ -1,3 +1,6 @@
+#g++ -Wall opencl-v22-example-simple-matacc.cc -lOpenCL -pthread -o opencl-v22-example-simple-matacc
+
+
 import os
 #import commands
 
@@ -34,20 +37,21 @@ devinfo=ARGUMENTS.get('info','0')
 devinfoflag=''
 if devinfo=='1':
     devinfoflag='-DDEVINFO'
-DEVFLAGS=['-DPLATIDX='+str(PLATIDX),'-DOCLV2','-DCL_TARGET_OPENCL_VERSION=120','-D'+dev,'-DKERNEL='+kernel,'-DWIDTH='+width,'-DREF='+ref,vflag, memreadflag,devinfoflag,nrunsflag]
+DEVFLAGS=['-DPLATIDX='+str(PLATIDX),'-DOCLV2','-DCL_TARGET_OPENCL_VERSION=220','-D'+dev,'-DKERNEL='+kernel,'-DWIDTH='+width,'-DREF='+ref,vflag, memreadflag,devinfoflag,nrunsflag]
 #if commands.getoutput("uname") == "Darwin":
 #    DEVFLAGS+=['-DOSX']
     
 
+#../DeviceInfo.cc
 
 sources=Split("""
-../DeviceInfo.cc
-matacc.cc
+matacc_oclv2.cc
 """);
 
 Help(help)
 env = Environment( CXX = 'g++', CXXFLAGS = ['-Wall','-g',DEVFLAGS])
 env['LIBS'] = ['OpenCL']
-prog=env.Program('matacc'+kernel,sources,CPPPATH=[NVSDKCUDA_ROOT+'/include'])
+prog=env.Program('matacc'+kernel,sources,CPPPATH=[])
 env.Depends(prog,['matacc.cl'])
+
 

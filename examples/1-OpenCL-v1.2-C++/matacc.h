@@ -20,7 +20,7 @@
 #include <sstream>
 
 //#include <iterator>
-#include "../DeviceInfo.h"
+#include "../../DeviceInfo.h"
 
 inline void checkErr(cl_int err, const char * name);
 inline double wsecond();

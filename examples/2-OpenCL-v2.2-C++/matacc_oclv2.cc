@@ -1,4 +1,4 @@
-#define CL_HPP_TARGET_OPENCL_VERSION 200
+#define CL_HPP_TARGET_OPENCL_VERSION 210
 #include <CL/cl2.hpp>
 #include <iostream>
 #include <vector>
@@ -8,8 +8,8 @@
 
 #define WIDTH 1024
 //1024
-#undef VERBOSE
-#define NRUNS 5
+//#undef VERBOSE
+//#define NRUNS 5
 
 inline void checkErr(cl_int err, const char * name);
 inline double wsecond();
