@@ -2,11 +2,25 @@
 use warnings;
 use strict;
 
-my @modes = qw(Read Write ReadWrite);
+=pod
+This script generates specialised subroutines for a set of array dimensions, types and access modes because Fortran is not polymorphic.
+The generated subroutines are
+
+    oclMake${dim}D${type}Array${mode}Buffer
+    oclWrite${dim}D${type}ArrayBuffer    
+    oclRead${dim}D${type}ArrayBuffer
+    
+=cut
+
+# Dimensions
+my @dims = (1..7); # Fortran arrays are limited to 7 dimensions
+# Types
 my @types = qw(Float Double Int Long);
+# Modes
+my @modes = qw(Read Write ReadWrite);
+
 my %ftypes =(Float => 'real', Int => 'integer', Double => 'real(8)', Long => 'integer(8)');
 my %wordsizes = (Float => 4, Double => 8, Int => 4, Long => 8);
-my @dims = (1..7); # Fortran arrays are limited to 7 dimensions
 
 sub gen_szstr {
 	my $dim=shift;
@@ -49,7 +63,7 @@ while (my $line = <$IN> ){
         ";
                     print $OUT $code_MakeArrayBuffer;
                 }
-            }
+            } # mode
 
             for my $mode (qw(Read ReadWrite)) {
                 for my $dim (@dims) {
@@ -72,10 +86,9 @@ while (my $line = <$IN> ){
         end subroutine
         ";
                     print $OUT $code_MakeArrayBuffer;
-                }
-            }
-
-        }
+                } # dim
+            } # mode
+        } # types
 
         print $OUT "\n! Write n-D Array Buffers\n\n";
 
@@ -103,7 +116,8 @@ while (my $line = <$IN> ){
         end subroutine
         ";
                 print $OUT $code_WriteBuffer;
-            }}
+            } # dim
+        } # type
 
         print $OUT "\n! Read n-D Array Buffers\n\n";
 
@@ -133,9 +147,9 @@ while (my $line = <$IN> ){
         end subroutine
         ";
                 print $OUT $code_ReadBuffer;
-            }
-        }
-    }
+            } # dim
+        } # type 
+    } # line
 } # loop over template source
 close $IN;
 close $OUT;

@@ -114,7 +114,7 @@ void oclinitc_(OclWrapperF ocl_ivp,const char* source,const char* kernel) {
 //	std::cout <<"oclinitc_: kernel=<"<<kernel<<">\n";
 	std::string kstr(kernel);
 	kstr.erase(std::remove_if(kstr.begin(), kstr.end(), isbrol), kstr.end());
-	std::cout <<"oclinitc_: kstr=<"<<kstr<<">\n";
+	// std::cout <<"oclinitc_: kstr=<"<<kstr<<">\n";
 	kernel=kstr.c_str();
 //	std::cout <<"oclinitc_: source=<"<<source<<">\n";
 	std::string sstr(source);
@@ -231,7 +231,7 @@ void runoclc_(OclWrapperF ocl_ivp,int* global , int* local, float* ext_time) {
     } else {
     	*ext_time = ocl->enqueueNDRangeRun(*global);
     }
-	//std::cout <<"ocl->enqueueNDRangeRun done!\n";
+	//std::cout <<"ocl->enqueueNDRangeRun done in "<< *ext_time<<"ms\n";
     /*
 	cl::NDRange* globalrange=new cl::NDRange(*global);
 	cl::NDRange* localrange;

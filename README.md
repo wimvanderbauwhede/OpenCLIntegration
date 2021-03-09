@@ -52,6 +52,10 @@ The environment variables defined in `ocl_env.sh` are the following, you should 
     export PATH=$OPENCL_DIR/bin:$PATH
 
 
+### Examples
+
+In the `examples` folder there are a number of examples illustrating the use of `OclWrapper` with C++, Fortran and Perl. See `README-examples.md` in that folder for more information.
+
 ### Building your code with the OclWrapper
 
 #### Scons builds
@@ -101,14 +105,12 @@ For example, to integrate OpenCL into Fortran, your SConscript would look like t
 
 and in your Makefile, add the following:
 
-      OCLINTDIR = $(OPENCL_INT_DIR)
+      OCL_DIR = $(OPENCL_DIR)
       OCL_OBJS = oclWrapper.o
-      OCL_LDFLAGS =  -L/path/to/OclWrapper -L$(OCLINTDIR) \
-                     -lOclWrapperF -lstdc++ -lOclWrapper -lOpenCL
+      OCL_LDFLAGS =  -L/path/to/OclWrapper -L$(OCL_DIR) \
+                     -lOclWrapperF -lOclWrapper -lOpenCL -lstdc++ 
 
 ### Using the OclWrapper
-
-In the `examples` folder there are a number of examples illustrating the use of `OclWrapper` with C++, Fortran and Perl. Below is a quick overview of the API.
 
 #### C++ API
 

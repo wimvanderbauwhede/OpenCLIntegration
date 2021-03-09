@@ -2,13 +2,13 @@ package OclWrapper;
 
 use strict;
 use warnings;
-#no warnings 'uninitialized';
+no warnings 'experimental';
 use feature qw(switch say);
 #use CTypes qw(unsigned char int long uint32_t);
 
 use Inline (
 'C' => 'DATA', # Don't know why this must be 'DATA'
-        LIBS => '-L. -L'.$ENV{'OPENCL_DIR'}.'/OpenCLIntegration/lib -lOclWrapperF -lstdc++ -lOpenCL',
+        LIBS => '-L. -L'.$ENV{'OPENCL_DIR'}.'/OpenCLIntegration/lib -lOclWrapperF -lOclWrapper -lOpenCL',
         INC => '-I'.$ENV{'OPENCL_DIR'}.'/OpenCLIntegration',
 		FORCE_BUILD => 0,
         CLEAN_AFTER_BUILD => 0
@@ -187,7 +187,9 @@ sub makeConstArg {
 
 sub run { (my $self, my $g, my $l)=@_;
 	my $ocl=$self->[0];
-	oclRun ($ocl,$g, $l);
+	my $t = oclRun($ocl,$g, $l);
+#print "Exectime:$t\n";
+    return $t;
 }
 
 sub setNThreads {
@@ -287,7 +289,11 @@ void oclSetFloatArrayArg(long ocl,int pos, long buf) {
 void oclSetIntConstArg(long ocl,int pos, int constarg) {
 	oclsetintconstargc_(&ocl,&pos, &constarg);
 }
-void oclRun (long ocl,int globalrange , int localrange) {
-	runoclc_(&ocl,&globalrange , &localrange);
+double oclRun(long ocl,int globalrange , int localrange ) {
+    float ext_time[1]={0.0};
+	runoclc_(&ocl,&globalrange , &localrange, ext_time);
+    double res = ext_time[0];
+    //printf("Exec time:%e\n",res);
+    return res;
 }
 

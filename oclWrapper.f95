@@ -4,27 +4,24 @@
 
     module oclWrapper
         implicit none
-!        integer(8) :: ocl ! Is not used in user code and would need to be per-thread unique, so it must be an array.
         integer(8), dimension(0:7) :: ocl ! Is not used in user code and would need to be per-thread unique, so it must be an array.
 #ifdef OCL_MULTIPLE_DEVICES
         integer(8) :: oclinstmap ! A pointer to a map from the POSIX thread ID to the OpenCL instance id, which is the index into the ocl array
 #endif
         integer :: oclNunits, oclNthreadsHint  ! Does not need to be package global, can be defined locally in the module doing the API calls
-! So I haven't solved this satisfactorily
-! A better way might be to use setters and getters for this, so that you would say "call oclStoreBuffer()" and "call oclLoadBuffer()"
 
         integer(8), dimension(256) :: oclBuffers ! Is used in user code and would need to be per-thread unique
-!#ifdef OCL_MULTIPLE_DEVICES
         integer(8), dimension(0:7,256) :: oclBuffersPerInst ! Is used in user code and would need to be per-thread unique, instead I require use of an explicit index
-!#endif
-        integer, dimension(256,3) :: oclBufferShapes ! Not used
+        ! integer, dimension(256,3) :: oclBufferShapes ! Not used
+
         integer :: oclGlobalRange, oclLocalRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         integer, dimension(2) :: oclGlobal2DRange, oclLocal2DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
         integer, dimension(3) :: oclGlobal3DRange, oclLocal3DRange ! Does not need to be package global, can be defined locally in the module doing the API calls
+
         save
         contains
-
-!        subroutine oclInit(srcstr,srclen,kstr,klen)
+        ! This is the main constructor for the OpenCL environment
+        ! The platform and device are handled via the build system
         subroutine oclInit(srcstrp,kstrp)
             integer(8) :: oclinstid
             integer :: srclen, klen
@@ -32,8 +29,6 @@
             character(len=:), allocatable :: srcstr, kstr
             srclen = len(srcstrp)
             klen = len(kstrp)
-!            character(srclen) :: srcstr 
-!            character(klen) :: kstr 
             allocate(character(len=srclen) :: srcstr)
             allocate(character(len=klen) :: kstr)
             srcstr=srcstrp
@@ -56,13 +51,10 @@
             character(len=:), allocatable :: srcstr, kstr
             srclen = len(srcstrp)
             klen = len(kstrp)
-!            character(srclen) :: srcstr 
-!            character(klen) :: kstr 
             allocate(character(len=srclen) :: srcstr)
             allocate(character(len=klen) :: kstr)
             srcstr=srcstrp
             kstr=kstrp
-!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
 #ifndef OCL_MULTIPLE_DEVICES
             oclinstid = 0
 #else
@@ -81,18 +73,15 @@
             srclen = len(srcstrp)
             klen = len(kstrp)
             koptslen = len(koptsstrp)
-!            character(srclen) :: srcstr 
-!            character(klen) :: kstr 
             allocate(character(len=srclen) :: srcstr)
             allocate(character(len=klen) :: kstr)
             allocate(character(len=koptslen) :: koptsstr)
             srcstr=srcstrp
             kstr=kstrp
             koptsstr = koptsstrp
-!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
             oclinstid = 0
 #ifdef OCL_MULTIPLE_DEVICES
-           call oclsetinstancec(oclinstmap, oclinstid)
+            call oclsetinstancec(oclinstmap, oclinstid)
 #endif
             call oclinitoptsf(ocl(oclinstid), srcstr, srclen, kstr, klen, koptsstr, koptslen)
         end subroutine        
@@ -106,20 +95,17 @@
             srclen = len(srcstrp)
             klen = len(kstrp)
             koptslen = len(koptsstrp)
-!            character(srclen) :: srcstr
-!            character(klen) :: kstr
             allocate(character(len=srclen) :: srcstr)
             allocate(character(len=klen) :: kstr)
             allocate(character(len=koptslen) :: koptsstr)
             srcstr=srcstrp
             kstr=kstrp
             koptsstr = koptsstrp
-!            print *, "source=<",srcstr,">;  kernel=<",kstr,">"
 #ifndef OCL_MULTIPLE_DEVICES
             oclinstid = 0
 #else
             oclinstid = devIdx
-           call oclsetinstancec(oclinstmap, oclinstid)
+            call oclsetinstancec(oclinstmap, oclinstid)
 #endif
 
             call oclinitoptsdevf(ocl(oclinstid), srcstr, srclen, kstr, klen, koptsstr, koptslen, devIdx)
@@ -150,9 +136,8 @@
             call oclGetNThreadsHintC(ocl(oclinstid),nthreads)
             oclNthreadsHint=nthreads
         end subroutine
-
         
-
+        ! These are deprecated, use the versions specialised by type/dim/mode below
         subroutine oclMakeFloatArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d
@@ -170,6 +155,7 @@
             sz1d = size(array)*4 ! x4 because real is 4 bytes
             call oclMakeReadBufferPtrC(ocl(oclinstid),buffer, sz1d, array)
         end subroutine
+
         subroutine oclMakeFloatArrayReadWriteBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -192,6 +178,7 @@
             !print *, 'sz1d:', sz1d
             call oclMakeReadWriteBufferPtrC(ocl(oclinstid),buffer, sz1d,array)
         end subroutine
+
         subroutine oclMakeIntArrayReadWriteBuffer(buffer, sz,array)
             integer(8):: buffer
             integer :: sz1d
@@ -214,6 +201,7 @@
             !print *, 'sz1d:', sz1d
             call oclMakeReadWriteBufferPtrC(ocl(oclinstid),buffer, sz1d,array)
         end subroutine
+        
         subroutine oclMakeIntArrayReadBuffer(buffer, sz, array)
             integer(8):: buffer
             integer :: sz1d

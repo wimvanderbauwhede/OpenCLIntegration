@@ -4,7 +4,23 @@ This folder contains example code with and without `OclWrapper`. All examples us
 
 ## Building the examples
 
-Every example can be built by `cd`-ing into the directory and running `scons`. The build script takes many options that let you configure the build in terms of the size of the matrix, the kernel to use, the device to run the kernel on, etc. Run `scons -h` for a list of all options.
+Every example except the Perl one can be built by `cd`-ing into the directory and running `scons`. The build script takes many options that let you configure the build in terms of the size of the matrix, the kernel to use, the device to run the kernel on, etc. Run `scons -h` for a list of all options.
+
+To run the Perl example, you must have the `Inline::C` module installed. Before first use, you must build the libraries in `$OPENCL_DIR/OpenCLIntegration/Perl` by running 
+
+    scons -f SConstruct.Perl.py [any options you require] install
+
+You can either add the `$OPENCL_DIR/OpenCLIntegration/Perl` directory to your `PERL5LIB` environment variable:
+
+    export PERL5LIB=4PERL5LIB:"$OPENCL_DIR/OpenCLIntegration/Perl"
+
+and then you can run the script simply as:
+
+    perl matacc.pl
+
+or specify it using the `-I` flag:
+
+    perl -I $OPENCL_DIR/OpenCLIntegration/Perl matacc.pl
 
 ## Description of the examples
 

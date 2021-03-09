@@ -84,11 +84,12 @@ my $t2_t3=tv_interval ($t2);
 say 'OpenCL setup time: ',$t2_t3;
 
 my $t4=[gettimeofday];
+my $exec_time=0.0;
 for my $run (1 .. $nruns) {
 # Write the array to the device
 	$ocl->writeArray($mA_buf,float, $mSize,$mA);
 # Run the kernel
-	$ocl->run($nunits*16,16);
+	$exec_time = $ocl->run($nunits*16,16);
 # Read back the results;
 	my $mC = $ocl->readArray($mC_buf,float, $nunits);
 #--------------------------------------------------------------------------------;
@@ -105,5 +106,6 @@ for my $run (1 .. $nruns) {
 
 } # nruns;
 my $t4_t5=tv_interval ($t4);
+say 'OpenCL kernel execution time: ',$exec_time;
 say 'OpenCL run time: ',$t4_t5;
 

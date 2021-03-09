@@ -426,7 +426,7 @@ def initOcl(*envt):
                 flib = env.Library('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
             fflib = env.Object('oclWrapper.o',OPENCL_DIR+'/OpenCLIntegration/oclWrapper.f95')
     if useOclWrapper:
-        if useFC=='1':
+        if useFC=='1':            
             if useDyn=='1':
                 flib = env.SharedLibrary('OclWrapperF', [oclsources,OPENCL_DIR+'/OpenCLIntegration/OclWrapperF.cc'])
             else:    
@@ -447,7 +447,7 @@ def initOcl(*envt):
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Prepend(LIBS=['OclWrapper'])
             env.Prepend(LIBS=['OclWrapperF'])
-        elif useFC=='1':
+        elif useFC=='1':            
             # env.Append(LIBS=['stdc++'])
             env.Install(OPENCL_DIR+'/OpenCLIntegration/lib', flib)
             env.Alias('installf',OPENCL_DIR+'/OpenCLIntegration/lib', flib)
